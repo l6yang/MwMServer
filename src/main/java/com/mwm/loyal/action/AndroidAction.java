@@ -260,7 +260,7 @@ public class AndroidAction extends MultiActionController implements ResListener{
             request.setAttribute("message", "信息错误");
             writer = response.getWriter();
             bean = new ResultBean();
-            bean.setResultCode(1);
+            bean.setResultCode(0);
             bean.setResultMsg(getReqParams(request, "apkVer"));
             bean.setExceptMsg("http://"+ Str.localhost+":8080/mwm/apk/mwm.apk");
             writer.print(bean);

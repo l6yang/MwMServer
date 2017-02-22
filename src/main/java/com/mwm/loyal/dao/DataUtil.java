@@ -8,15 +8,12 @@ import com.mwm.loyal.imp.ResListener;
 import com.mwm.loyal.utils.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataUtil implements ResListener{
+public class DataUtil implements ResListener {
     private static final String className = "oracle.jdbc.driver.OracleDriver";
     private static final String user = "loyal";
     private static final String password = "111111";
@@ -49,7 +46,12 @@ public class DataUtil implements ResListener{
             pre.setString(1, loginBean.getAccount());
             pre.setString(2, loginBean.getPassword());
             pre.setString(3, loginBean.getNickname());
-            FileInputStream in = new FileInputStream("E:\\Oracle\\images\\mvvm.jpg");
+            File copyFile = new File("E:\\Oracle\\images\\mwm.jpg");
+            File file = new File("E:\\IntelliJ Space\\MwMServer\\src\\main\\webapp\\images\\mwm.jpg");
+            if (!copyFile.exists()) {
+                new CopyFileThread(file, copyFile).run();
+            }
+            FileInputStream in = new FileInputStream(copyFile.exists() ? copyFile : file);
             pre.setBinaryStream(4, in);
             pre.setString(5, loginBean.getSignature());
             pre.setString(6, "0");
@@ -207,8 +209,12 @@ public class DataUtil implements ResListener{
         OutputStream outputStream = null;
         FileInputStream fis = null;
         try {
-            File file = new File("E:\\Oracle\\apks\\qq.apk");
-            fis = new FileInputStream(file);
+            File copyFile = new File("E:\\Oracle\\apks\\mwm.apk");
+            File file = new File("E:\\Oracle\\apks\\mwm.apk");
+            if (!copyFile.exists()) {
+                new CopyFileThread(file, copyFile).run();
+            }
+            fis = new FileInputStream(copyFile.exists() ? copyFile : file);
             byte[] data = new byte[(int) fis.getChannel().size()];
             fis.read(data);
             outputStream = response.getOutputStream();
@@ -371,7 +377,7 @@ public class DataUtil implements ResListener{
         PreparedStatement pre = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("UPDATE  MWM_ACCOUNT SET  M_ICON= ? WHERE M_ID= ?");
+            pre = conn.prepareStatement("UPDATE  MWM_ACCOUNT SET M_ICON= ? WHERE M_ID= ?");
             pre.setBlob(1, inputStream);
             pre.setString(2, account);
             int result = pre.executeUpdate();
@@ -395,7 +401,7 @@ public class DataUtil implements ResListener{
         PreparedStatement pre = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("UPDATE  MWM_ACCOUNT SET M_NICKNAME= ? , M_SIGNATURE= ? WHERE M_ID= ?");
+            pre = conn.prepareStatement("UPDATE MWM_ACCOUNT SET M_NICKNAME= ? , M_SIGNATURE= ? WHERE M_ID= ?");
             if (loginBean.getNickname() != null || !loginBean.getNickname().isEmpty())
                 pre.setString(1, loginBean.getNickname());
             if (loginBean.getSignature() != null || !loginBean.getSignature().isEmpty())
@@ -420,7 +426,7 @@ public class DataUtil implements ResListener{
         }
     }
 
-    private static Connection getConnection() throws Exception {
+    private static Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName(className);
         String url = "jdbc:oracle:thin:@" + Str.localhost + ":1521/orcl";
         return DriverManager.getConnection(url, user, password);
@@ -487,9 +493,45 @@ public class DataUtil implements ResListener{
         }
     }
 
+    private static void copyFile(File file, File copyFile) throws FileNotFoundException {
+        FileInputStream fis = new FileInputStream(file);
+        FileOutputStream fos = new FileOutputStream(copyFile);
+        byte[] bytes = new byte[1024];
+        int length;
+        try {
+            while ((length = fis.read(bytes)) != -1) {
+                fos.write(bytes, 0, length);
+            }
+            fos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            StreamUtil.close(fis);
+            StreamUtil.close(fos);
+        }
+    }
+
     private static ResultBean errorBean(ResultBean bean, Exception e) {
         bean.setResultCode(-1);
         bean.setResultMsg(e.getMessage());
         return bean;
+    }
+
+    private static class CopyFileThread implements Runnable {
+        private File file, copyFile;
+
+        CopyFileThread(File file, File copyFile) {
+            this.file = file;
+            this.copyFile = copyFile;
+        }
+
+        @Override
+        public void run() {
+            try {
+                copyFile(file, copyFile);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

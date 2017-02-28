@@ -21,16 +21,7 @@ public class GsonUtil {
 
     public static <T> T getBeanFromJson(HttpServletRequest request, String param, Class<T> tClass) {
         String json = request.getParameter(param);
-        System.out.println(json+" : "+tClass.getName());
-        return getBeanFromJson(json, tClass);
-    }
-
-    public static <T> T getBeanFromCipherJson(HttpServletRequest request, String param, Class<T> tClass) {
-        String json = request.getParameter(param);
-        if (json == null)
-            return null;
-        json = CipherUtil.decodeStr(json);
-        System.out.println(json);
+        System.out.println(json + " : " + tClass.getName());
         return getBeanFromJson(json, tClass);
     }
 

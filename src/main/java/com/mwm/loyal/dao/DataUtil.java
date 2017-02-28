@@ -260,7 +260,7 @@ public class DataUtil implements ResListener {
             pre.setTimestamp(1, TimeUtil.date2Timestamp(contactBean.getTime()));
             pre.setString(2, contactBean.getAccount());
             String contact = contactBean.getContact();
-            contact = contact.replace("mwm.loyalhttp://" + Str.localhost + ":8080/mwm/action.do?method=doScan&k=", "");
+            contact = contact.substring(contact.indexOf("&k=")).replace("&k=", "");
             pre.setString(3, CipherUtil.decodeStr(contact));
             int result = pre.executeUpdate();
             bean.setResultCode(result);

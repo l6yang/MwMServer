@@ -25,7 +25,7 @@ public class CipherUtil {
 
     private static void init() throws NoSuchPaddingException {
         try {
-            /**为指定算法生成一个 KeyGenerator 对象。
+            /*为指定算法生成一个 KeyGenerator 对象。
              *此类提供（对称）密钥生成器的功能。
              *密钥生成器是使用此类的某个 getInstance 类方法构造的。
              *KeyGenerator 对象可重复使用，也就是说，在生成密钥后，
@@ -84,7 +84,7 @@ public class CipherUtil {
                 e.printStackTrace();
             }
         }
-        /**
+        /*
          *类 SecretKeySpec
          *可以使用此类来根据一个字节数组构造一个 SecretKey，
          *而无须通过一个（基于 provider 的）SecretKeyFactory。
@@ -138,11 +138,11 @@ public class CipherUtil {
     /**
      * 将二进制转换成16进制
      *
-     * @param buf
+     * @param buf byte
      * @return
      */
 
-    public static String parseByte2HexStr(byte buf[]) {
+    private static String parseByte2HexStr(byte buf[]) {
         String sb = "";
         for (byte b : buf) {
             String hex = Integer.toHexString(b & 0xFF);
@@ -157,9 +157,9 @@ public class CipherUtil {
     /**
      * 将16进制转换为二进制
      *
-     * @param hexStr
+     * @param hexStr 16进制
      */
-    public static byte[] parseHexStr2Byte(String hexStr) {
+    private static byte[] parseHexStr2Byte(String hexStr) {
         if (hexStr.length() < 1)
             return null;
         byte[] result = new byte[hexStr.length() / 2];

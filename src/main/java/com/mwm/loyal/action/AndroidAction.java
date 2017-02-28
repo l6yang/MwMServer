@@ -227,10 +227,13 @@ public class AndroidAction extends MultiActionController implements ResListener{
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             String param = getReqParams(request, "param");
-            ContactBean contactBean = GsonUtil.getBeanFromCipherJson(request, "json_scan", ContactBean.class);
+            String json = getReqParams(request, "json_scan");
+            System.out.println("doScan::"+param);
+            System.out.println("doScan::"+json);
             if (param.isEmpty() || !param.equals("com.mwm.loyal")) {
                 doScanJsp(request, response);
             } else {
+                ContactBean contactBean = GsonUtil.getBeanFromJson(json, ContactBean.class);
                 bean = DataUtil.doInsertContact(contactBean);
                 writer.print(bean);
             }

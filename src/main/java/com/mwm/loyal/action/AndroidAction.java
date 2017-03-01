@@ -17,26 +17,21 @@ import org.springframework.web.servlet.mvc.multiaction.MultiActionController;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
 import java.io.PrintWriter;
 import java.util.List;
 
-public class AndroidAction extends MultiActionController implements ResListener{
+public class AndroidAction extends MultiActionController implements ResListener {
 
     public void doRegister(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             LoginBean loginBean = GsonUtil.getBeanFromJson(request, "json_register", LoginBean.class);
-            bean = DataUtil.doRegister(loginBean);
+            ResultBean bean = DataUtil.doRegister(loginBean);
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -44,19 +39,15 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doLoginTest(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             String account = request.getParameter("account");
             String password = request.getParameter("password");
-            bean = DataUtil.doLogin(new LoginBean(account, password));
+            ResultBean bean = DataUtil.doLogin(new LoginBean(account, password));
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -64,18 +55,14 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doLogin(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             LoginBean loginBean = GsonUtil.getBeanFromJson(request, "json_login", LoginBean.class);
-            bean = DataUtil.doLogin(loginBean);
+            ResultBean bean = DataUtil.doLogin(loginBean);
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -106,18 +93,14 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doUpdateAccount(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             LoginBean loginBean = GsonUtil.getBeanFromJson(request, "json_update", LoginBean.class);
-            bean = DataUtil.doUpdate(loginBean, getReqParams(request, "update_state"), getReqParams(request, "old_data"));
+            ResultBean bean = DataUtil.doUpdate(loginBean, getReqParams(request, "update_state"), getReqParams(request, "old_data"));
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -125,18 +108,14 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doAccountLocked(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             String account = getReqParams(request, "account");
-            bean = DataUtil.doLocked(account);
+            ResultBean bean = DataUtil.doLocked(account);
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -144,7 +123,6 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doUpdateIcon(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
@@ -165,16 +143,13 @@ public class AndroidAction extends MultiActionController implements ResListener{
                         request.setAttribute(name, filename);
                         //System.out.println(name + "::" + value + "::" + filename);
                         //System.out.println("获取文件总量的容量:" + item.getSize());
-                        bean = DataUtil.doUpdateIcon(name, item.getInputStream());
+                        ResultBean bean = DataUtil.doUpdateIcon(name, item.getInputStream());
                         writer.print(bean);
                     }
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -182,18 +157,14 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doFeedBack(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             FeedBackBean feedBackBean = GsonUtil.getBeanFromJson(request, "json_feed", FeedBackBean.class);
-            bean = DataUtil.doFeedBack(feedBackBean);
+            ResultBean bean = DataUtil.doFeedBack(feedBackBean);
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -203,7 +174,6 @@ public class AndroidAction extends MultiActionController implements ResListener{
         response.reset();
         response.setContentType("image/jpeg");
         PrintWriter writer = null;
-        ResultBean bean;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
@@ -211,9 +181,6 @@ public class AndroidAction extends MultiActionController implements ResListener{
             dis.forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -221,27 +188,20 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doScan(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
-            File root = new File(System.getProperty("user.dir") + "\\src");
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
             String param = getReqParams(request, "param");
             String json = getReqParams(request, "json_scan");
-            System.out.println("doScan::"+param);
-            System.out.println("doScan::"+json);
             if (param.isEmpty() || !param.equals("com.mwm.loyal")) {
                 doScanJsp(request, response);
             } else {
                 ContactBean contactBean = GsonUtil.getBeanFromJson(json, ContactBean.class);
-                bean = DataUtil.doInsertContact(contactBean);
+                ResultBean bean = DataUtil.doInsertContact(contactBean);
                 writer.print(bean);
             }
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(e.getMessage());
         } finally {
             release(writer);
         }
@@ -258,20 +218,13 @@ public class AndroidAction extends MultiActionController implements ResListener{
 
     public void doCheckApkVer(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        ResultBean bean;
         try {
-            request.setAttribute("message", "信息错误");
             writer = response.getWriter();
-            bean = new ResultBean();
-            bean.setResultCode(0);
-            bean.setResultMsg(getReqParams(request, "apkVer"));
-            bean.setExceptMsg("http://"+ Str.localhost+":8080/mwm/apk/mwm.apk");
+            ResultBean bean = DataUtil.queryApkVersion(getReqParams(request, "apkVer"));
+            System.out.println(bean.toString());
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();
-            bean = new ResultBean();
-            bean.setResultCode(-99);
-            bean.setResultMsg(getReqParams(request, "apkVer"));
         } finally {
             release(writer);
         }

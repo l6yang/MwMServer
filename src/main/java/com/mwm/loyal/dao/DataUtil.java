@@ -1,9 +1,6 @@
 package com.mwm.loyal.dao;
 
-import com.mwm.loyal.beans.ContactBean;
-import com.mwm.loyal.beans.FeedBackBean;
-import com.mwm.loyal.beans.LoginBean;
-import com.mwm.loyal.beans.ResultBean;
+import com.mwm.loyal.beans.*;
 import com.mwm.loyal.imp.ResListener;
 import com.mwm.loyal.utils.*;
 
@@ -260,8 +257,9 @@ public class DataUtil implements ResListener {
             pre.setTimestamp(1, TimeUtil.date2Timestamp(contactBean.getTime()));
             pre.setString(2, contactBean.getAccount());
             String contact = contactBean.getContact();
-            contact = contact.substring(contact.indexOf("&k=")).replace("&k=", "");
-            pre.setString(3, CipherUtil.decodeStr(contact));
+            if (contact.contains("&k="))
+                contact = contact.substring(contact.indexOf("&k=")).replace("&k=", "");
+            pre.setString(3, contact.contains("&k=") ? CipherUtil.decodeStr(contact) : contact);
             int result = pre.executeUpdate();
             bean.setResultCode(result);
             if (result == -1)
@@ -459,6 +457,32 @@ public class DataUtil implements ResListener {
             StreamUtil.close(resultSet, conn, pre);
         }
         return nearList;
+    }
+
+    //从数据库中查找是否有新版本
+    public static ResultBean queryApkVersion(String apkVer) {
+        List<ResultBean> beanList = new ArrayList<>();
+        ResultBean bean = new ResultBean();
+        Connection conn = null;
+        PreparedStatement pre = null;
+        ResultSet resultSet = null;
+        try {
+            conn = getConnection();
+            //select *from MWM_VER  where ver_zt='1' and VER_VERSION>'1.1.0' order by VER_VERSION desc;
+            pre = conn.prepareStatement("SELECT * FROM MWM_VER WHERE ver_zt= ? AND VER_VERSION > ? order by VER_VERSION desc");
+            pre.setString(1, "1");
+            pre.setString(2, apkVer);
+            resultSet = pre.executeQuery();
+            while (resultSet.next()) {
+                beanList.add(new ResultBean(1, resultSet.getString("ver_url"), null));
+            }
+            return beanList.isEmpty() ? new ResultBean(-1,"当前已是最新版本") : beanList.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return errorBean(bean, e);
+        } finally {
+            StreamUtil.close(resultSet, conn, pre);
+        }
     }
 
     //需要删除

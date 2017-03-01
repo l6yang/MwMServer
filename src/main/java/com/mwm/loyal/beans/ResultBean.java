@@ -1,9 +1,14 @@
 package com.mwm.loyal.beans;
 
-public class ResultBean extends BaseBean {
+public class ResultBean {
     private int resultCode;
     private String resultMsg;
     private String exceptMsg;
+
+    public ResultBean(int resultCode, String resultMsg) {
+        this.resultCode = resultCode;
+        this.resultMsg = resultMsg;
+    }
 
     public ResultBean(int resultCode, String resultMsg, String exceptMsg) {
         this.resultCode = resultCode;

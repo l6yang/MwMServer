@@ -27,7 +27,7 @@ public class StreamUtil {
         return b;
     }
 
-    public static void close(ResultSet rs,  Connection conn, PreparedStatement pre) {
+    public static void close(ResultSet rs, Connection conn, PreparedStatement pre) {
         close(rs);
         close(conn);
         close(pre);

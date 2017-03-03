@@ -4,22 +4,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class StringUtil {
-    //端口号
-    public static final String http = "http://";
-    //private static final String url = http + ip + port;
-    //http://192.168.1.140:8080/mvvm/login.do?method=loginCode
-    //private static final String ip = "wg.gsgajt.gov.cn";
-    //private static String ip = "61.178.79.18";
-    //private static final String ip = "7.200.10.91";
-    public static final String ip = "192.168.1.140";
-    public static final String port = ":8080";
-    private static final String url = http + ip + port + "/mvvm/action.do?method=";
-
-    //测试环境  gslkyw  真实环境  vehregister
-    //public static String Uri = http + ip + port;
-    public static String getServiceUrl(String method) {
-        return url + method;
-    }
 
     public static String replaceNull(Object object) {
         return object == null || object.toString().equals("null") ? "" : object.toString();
@@ -53,10 +37,6 @@ public class StringUtil {
         Pattern pattern = Pattern.compile(ipPattern);
         Matcher matcher = pattern.matcher(address);
         return matcher.matches();
-    }
-
-    public static String getSpinItem(String str) {
-        return str.split(":").length == 2 ? str.split(":")[1] : str;
     }
 
     public static String replaceTime(String str) {

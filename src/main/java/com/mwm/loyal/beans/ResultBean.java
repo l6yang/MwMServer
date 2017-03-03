@@ -5,11 +5,6 @@ public class ResultBean {
     private String resultMsg;
     private String exceptMsg;
 
-    public ResultBean(int resultCode, String resultMsg) {
-        this.resultCode = resultCode;
-        this.resultMsg = resultMsg;
-    }
-
     public ResultBean(int resultCode, String resultMsg, String exceptMsg) {
         this.resultCode = resultCode;
         this.exceptMsg = exceptMsg;

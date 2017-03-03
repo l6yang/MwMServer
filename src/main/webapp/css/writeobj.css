@@ -1,0 +1,92 @@
+body {
+    margin: 0 0 0 0;
+}
+
+.text_12 {
+    font-size: 12px;
+}
+
+.text_14 {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.table_val {
+    padding: 0 0 0 20px;
+}
+
+.tr {
+    background-color: #FFFFFF;
+}
+
+.td1 {
+    background-color: #ecf1f4;
+    font-size: 12px;
+    line-height: 20px;
+    nowrap: nowrap;
+}
+
+.td2 {
+    background: ghostwhite;
+    color: #333;
+    font-size: 12px;
+    nowrap: nowrap;
+}
+
+.td3 {
+    background-color: #ecf1f4;
+    font-size: 12px;
+    line-height: 20px;
+    border: 1px solid #99CCCC;
+}
+
+.td4 {
+    background: ghostwhite;
+    color: #333;
+    border: 1px solid #99CCCC;
+}
+
+.fy {
+    border-bottom: 1px solid #cccccc;
+    border-left: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+}
+
+.fy_td {
+    line-height: 20px;
+    background-color: #e8e8e8;
+}
+
+.text_readonly {
+    background-color: #ecf1f4;
+}
+
+.inp {
+    height: 18px;
+    border: 1px solid #AEDEF2;
+    background: #ffffff;
+    font-size: 12px;
+}
+
+.select {
+    position: relative;
+    border: 1px solid #A4BED4;
+    height: 20px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+[lang|="en"] {
+    border: 1px solid #A4BED4;
+    font-size: 12px;
+    height: 20px;
+    padding-top: 2px
+}
+
+.combobox-item {
+    cursor: pointer;
+}
+
+::-ms-clear {
+    display: none;
+}

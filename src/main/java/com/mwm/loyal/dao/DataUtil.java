@@ -1,7 +1,7 @@
 package com.mwm.loyal.dao;
 
 import com.mwm.loyal.beans.*;
-import com.mwm.loyal.imp.ResListener;
+import com.mwm.loyal.imp.Contact;
 import com.mwm.loyal.utils.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -10,7 +10,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataUtil implements ResListener {
+public class DataUtil implements Contact {
     private static final String className = "oracle.jdbc.driver.OracleDriver";
     private static final String user = "loyal";
     private static final String password = "111111";
@@ -393,6 +393,54 @@ public class DataUtil implements ResListener {
         }
     }
 
+    public static ResultBean doUpdateApk(String apkName, String version, InputStream inputStream) {
+        ResultBean bean = new ResultBean();
+        Connection conn = null;
+        PreparedStatement pre = null;
+        ResultSet resultSet = null;
+        try {
+            conn = getConnection();
+            pre = conn.prepareStatement("SELECT * FROM MWM_VER");
+            resultSet = pre.executeQuery();
+            while (resultSet.next()) {
+                int result = deleteApk(resultSet.getString("apk_version"));
+                if (result != 1)
+                    break;
+            }
+            pre = conn.prepareStatement("INSERT INTO MWM_VER VALUES (?,?,?,?,?)");
+            pre.setString(1, apkName);
+            pre.setString(2, version);
+            pre.setBlob(3, inputStream);
+            pre.setTimestamp(4, TimeUtil.getTimestamp());
+            pre.setString(5, "1");
+            int result = pre.executeUpdate();
+            bean.setResultCode(result);
+            bean.setResultMsg(result == 1 ? "上传成功" : "上传失败");
+            return bean;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return errorBean(bean, e);
+        } finally {
+            StreamUtil.close(resultSet, conn, pre);
+        }
+    }
+
+    private static int deleteApk(String appVer) {
+        PreparedStatement pre = null;
+        Connection conn = null;
+        try {
+            conn = getConnection();
+            pre = conn.prepareStatement("DELETE FROM MWM_VER WHERE apk_version =?");
+            pre.setString(1, appVer);
+            return pre.executeUpdate();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            return -1;
+        } finally {
+            StreamUtil.close(null, conn, pre);
+        }
+    }
+
     public static ResultBean doUpdate(LoginBean loginBean) {
         ResultBean bean = new ResultBean();
         Connection conn = null;
@@ -442,7 +490,7 @@ public class DataUtil implements ResListener {
         try {
             conn = getConnection();
             String nowTime = TimeUtil.getDateTime();
-            String before = TimeUtil.beforeMonth(nowTime, ResListener.Str.TIME_ALL, 1);
+            String before = TimeUtil.beforeMonth(nowTime, Contact.Str.TIME_ALL, 1);
             pre = conn.prepareStatement("SELECT * FROM MWM_ACCOUNT_SECURITY WHERE M_ACCOUNT= ? AND M_TIME BETWEEN ? AND ?");
             pre.setString(1, account);
             pre.setTimestamp(2, TimeUtil.date2Timestamp(before));
@@ -460,7 +508,7 @@ public class DataUtil implements ResListener {
     }
 
     //从数据库中查找是否有新版本
-    public static ResultBean queryApkVersion(String apkVer) {
+    public static ResultBean queryApkVersion(String apkVer, String port) {
         List<ResultBean> beanList = new ArrayList<>();
         ResultBean bean = new ResultBean();
         Connection conn = null;
@@ -468,15 +516,14 @@ public class DataUtil implements ResListener {
         ResultSet resultSet = null;
         try {
             conn = getConnection();
-            //select *from MWM_VER  where ver_zt='1' and VER_VERSION>'1.1.0' order by VER_VERSION desc;
-            pre = conn.prepareStatement("SELECT * FROM MWM_VER WHERE ver_zt= ? AND VER_VERSION > ? order by VER_VERSION desc");
+            pre = conn.prepareStatement("SELECT * FROM MWM_VER WHERE APK_ZT= ? order by APK_TIME desc");
             pre.setString(1, "1");
-            pre.setString(2, apkVer);
             resultSet = pre.executeQuery();
             while (resultSet.next()) {
-                beanList.add(new ResultBean(1, resultSet.getString("ver_url"), null));
+                String apkUrl = "http://192.168.0.66:" + port + "/mwm/apk/mwm_" + resultSet.getString("apk_version") + ".apk";
+                beanList.add(new ResultBean(1, apkUrl, null));
             }
-            return beanList.isEmpty() ? new ResultBean(-1,"当前已是最新版本") : beanList.get(0);
+            return beanList.isEmpty() ? new ResultBean(-1, "当前已是最新版本", null) : beanList.get(0);
         } catch (Exception e) {
             e.printStackTrace();
             return errorBean(bean, e);

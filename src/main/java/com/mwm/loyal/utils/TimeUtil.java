@@ -1,6 +1,6 @@
 package com.mwm.loyal.utils;
 
-import com.mwm.loyal.imp.ResListener;
+import com.mwm.loyal.imp.Contact;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -9,7 +9,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class TimeUtil implements ResListener {
+public class TimeUtil implements Contact {
     public static String getWeek() {
         SimpleDateFormat format = new SimpleDateFormat(Str.TIME_WEEK, Locale.CHINA);
         return StringUtil.replaceTime(format.format(new Date()));
@@ -184,14 +184,5 @@ public class TimeUtil implements ResListener {
         } catch (Exception e) {
             return "";
         }
-    }
-
-    public static void main(String[] args) {
-        System.out.println(date2Timestamp("2016-11-23 09:33:51"));
-        String before = beforeMonth("2016-11-23 09:33:51", Str.TIME_ALL, 1);
-        System.out.println(date2Timestamp(before));
-        Object object = null;
-        String str = (String) object;
-        System.out.println(str == null);
     }
 }

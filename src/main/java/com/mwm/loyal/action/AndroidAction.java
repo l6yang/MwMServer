@@ -56,6 +56,22 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
+    @RequestMapping(params = "method=doQueryAccount")
+    public void doQueryAccount(HttpServletRequest request, HttpServletResponse response) {
+        PrintWriter writer = null;
+        try {
+            writer = response.getWriter();
+            response.setCharacterEncoding("utf-8");
+            ResultBean bean = DataUtil.doQueryAccount(getReqParams(request,"account"));
+            System.out.println(bean.toString());
+            writer.print(bean);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            release(writer);
+        }
+    }
+
     @RequestMapping(params = "method=doShowIconByIO")
     public void doShowIconByIO(HttpServletRequest request, HttpServletResponse response) {
         response.setContentType("image/jpeg");
@@ -270,7 +286,7 @@ public class AndroidAction extends MultiActionController implements Contact {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            ResultBean bean = DataUtil.queryApkVersion(getReqParams(request, "apkVer"), String.valueOf(request.getLocalPort()));
+            ResultBean bean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()),getReqParams(request,"apkVer"));
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();

@@ -115,6 +115,31 @@ public class DataUtil implements Contact {
         }
     }
 
+    public static ResultBean doQueryAccount(String account) {
+        ResultBean bean = new ResultBean();
+        Connection conn = null;
+        PreparedStatement pre = null;
+        ResultSet rs = null;
+        try {
+            conn = getConnection();
+            pre = conn.prepareStatement("SELECT *FROM MWM_account where M_ID=?");
+            pre.setString(1, account);
+            rs = pre.executeQuery();
+            if (rs.next()) {
+                bean.setResultCode(1);
+                bean.setResultMsg(rs.getString("m_nickname"));
+                bean.setExceptMsg(rs.getString("m_signature"));
+            } else
+                bean.setResultCode(-1);
+            return bean;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return errorBean(bean, e);
+        } finally {
+            StreamUtil.close(rs, conn, pre);
+        }
+    }
+
     /**
      * 判断绑定的设备是否与当前登录设备一致
      */
@@ -191,8 +216,8 @@ public class DataUtil implements Contact {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            StreamUtil.close(in);
             StreamUtil.close(outputStream);
+            StreamUtil.close(in);
             StreamUtil.close(rs, conn, pre);
         }
     }
@@ -220,8 +245,8 @@ public class DataUtil implements Contact {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            StreamUtil.close(fis);
             StreamUtil.close(outputStream);
+            StreamUtil.close(fis);
             //StreamUtil.close(rs, conn, pre);
         }
     }
@@ -292,6 +317,10 @@ public class DataUtil implements Contact {
                         bean.setResultMsg("用户不存在，请注册");
                     else if (result == -1)
                         bean.setResultMsg("更新资料失败");
+                    else if (result == 1) {
+                        bean.setResultMsg(loginBean.getNickname());
+                        bean.setExceptMsg(loginBean.getSignature());
+                    }
                     break;
                 case "password":
                     pre = conn.prepareStatement("SELECT *FROM MWM_ACCOUNT WHERE M_PASSWORD=? AND M_ID=?");
@@ -508,7 +537,7 @@ public class DataUtil implements Contact {
     }
 
     //从数据库中查找是否有新版本
-    public static ResultBean queryApkVersion(String apkVer, String port) {
+    public static ResultBean queryApkVersion(String port,String apkVer) {
         List<ResultBean> beanList = new ArrayList<>();
         ResultBean bean = new ResultBean();
         Connection conn = null;
@@ -516,12 +545,13 @@ public class DataUtil implements Contact {
         ResultSet resultSet = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT * FROM MWM_VER WHERE APK_ZT= ? order by APK_TIME desc");
+            pre = conn.prepareStatement("SELECT * FROM MWM_VER WHERE APK_ZT= ? AND APK_VERSION>? order by APK_TIME desc");
             pre.setString(1, "1");
+            pre.setString(2, apkVer);
             resultSet = pre.executeQuery();
             while (resultSet.next()) {
                 String apkUrl = "http://192.168.0.66:" + port + "/mwm/apk/mwm_" + resultSet.getString("apk_version") + ".apk";
-                beanList.add(new ResultBean(1, apkUrl, null));
+                beanList.add(new ResultBean(1, "检查到新版本", apkUrl));
             }
             return beanList.isEmpty() ? new ResultBean(-1, "当前已是最新版本", null) : beanList.get(0);
         } catch (Exception e) {
@@ -577,8 +607,8 @@ public class DataUtil implements Contact {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            StreamUtil.close(fis);
             StreamUtil.close(fos);
+            StreamUtil.close(fis);
         }
     }
 

@@ -56,13 +56,29 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
+    @RequestMapping(params = "method=doLoginWithJson")
+    public void doLoginWithJson(HttpServletRequest request, HttpServletResponse response) {
+        PrintWriter writer = null;
+        try {
+            writer = response.getWriter();
+            response.setCharacterEncoding("utf-8");
+            LoginBean loginBean = new LoginBean(getReqParams(request, "account"), getReqParams(request, "password"));
+            ResultBean bean = DataUtil.doLogin(loginBean);
+            writer.print(bean);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            release(writer);
+        }
+    }
+
     @RequestMapping(params = "method=doQueryAccount")
     public void doQueryAccount(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
-            ResultBean bean = DataUtil.doQueryAccount(getReqParams(request,"account"));
+            ResultBean bean = DataUtil.doQueryAccount(getReqParams(request, "account"));
             System.out.println(bean.toString());
             writer.print(bean);
         } catch (Exception e) {
@@ -286,7 +302,7 @@ public class AndroidAction extends MultiActionController implements Contact {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            ResultBean bean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()),getReqParams(request,"apkVer"));
+            ResultBean bean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()), getReqParams(request, "apkVer"));
             writer.print(bean);
         } catch (Exception e) {
             e.printStackTrace();

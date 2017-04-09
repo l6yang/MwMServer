@@ -19,16 +19,7 @@ public class DataUtil implements Contact {
         return "select * from MWM_account where M_ID='" + loginBean.getAccount() + "'";
     }
 
-    private static String returnUpdateSql(LoginBean loginBean) {
-        return "update MWM_ACCOUNT set M_PASSWORD='" + loginBean.getPassword() + "'where M_ID='" + loginBean.getAccount() + "'";
-    }
-
     private static String returnFeedBackSql(FeedBackBean feedBackBean) {
-        //String类型插入Oracle Date类型数据  需要通过to_date转换
-        return "insert into MWM_FEED_BACK values (to_date('" + feedBackBean.getTime() + "','yyyy-mm-dd hh24:mi:ss'),'" + feedBackBean.getAccount() + "','" + feedBackBean.getContent() + "')";
-    }
-
-    private static String returnContactSql(FeedBackBean feedBackBean) {
         //String类型插入Oracle Date类型数据  需要通过to_date转换
         return "insert into MWM_FEED_BACK values (to_date('" + feedBackBean.getTime() + "','yyyy-mm-dd hh24:mi:ss'),'" + feedBackBean.getAccount() + "','" + feedBackBean.getContent() + "')";
     }
@@ -165,32 +156,6 @@ public class DataUtil implements Contact {
         }
     }
 
-    public static ResultBean doShowLogin(LoginBean loginBean) {
-        ResultBean bean = new ResultBean();
-        Connection conn = null;
-        PreparedStatement pre = null;
-        ResultSet rs = null;
-        try {
-            conn = getConnection();
-            pre = conn.prepareStatement(returnQuerySql(loginBean));
-            rs = pre.executeQuery();
-            if (rs.next()) {
-                bean.setResultCode(1);
-                bean.setResultMsg(rs.getString("m_nickname"));
-                bean.setExceptMsg(rs.getString("m_signature"));
-            } else {
-                bean.setResultCode(-1);
-                bean.setResultMsg("用户不存在");
-            }
-            return bean;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return errorBean(bean, e);
-        } finally {
-            StreamUtil.close(rs, conn, pre);
-        }
-    }
-
     public static void doShowIconByIO(HttpServletResponse response, LoginBean loginBean) {
         response.setContentType("image/jpeg");
         Connection conn = null;
@@ -223,11 +188,6 @@ public class DataUtil implements Contact {
     }
 
     public static void doDownLoadApk(HttpServletResponse response) {
-        response.setContentType("application/octet-stream;charset=UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"mwm.apk\"");
-        Connection conn = null;
-        PreparedStatement pre = null;
-        ResultSet rs = null;
         OutputStream outputStream = null;
         FileInputStream fis = null;
         try {
@@ -247,7 +207,6 @@ public class DataUtil implements Contact {
         } finally {
             StreamUtil.close(outputStream);
             StreamUtil.close(fis);
-            //StreamUtil.close(rs, conn, pre);
         }
     }
 
@@ -465,37 +424,6 @@ public class DataUtil implements Contact {
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
             return -1;
-        } finally {
-            StreamUtil.close(null, conn, pre);
-        }
-    }
-
-    public static ResultBean doUpdate(LoginBean loginBean) {
-        ResultBean bean = new ResultBean();
-        Connection conn = null;
-        PreparedStatement pre = null;
-        try {
-            conn = getConnection();
-            pre = conn.prepareStatement("UPDATE MWM_ACCOUNT SET M_NICKNAME= ? , M_SIGNATURE= ? WHERE M_ID= ?");
-            if (loginBean.getNickname() != null || !loginBean.getNickname().isEmpty())
-                pre.setString(1, loginBean.getNickname());
-            if (loginBean.getSignature() != null || !loginBean.getSignature().isEmpty())
-                pre.setString(2, loginBean.getSignature());
-            if (loginBean.getAccount() != null || !loginBean.getAccount().isEmpty())
-                pre.setString(3, loginBean.getAccount());
-            int result = pre.executeUpdate();
-            bean.setResultCode(result);
-            if (result == -1)
-                bean.setResultMsg("用户已存在");
-            return bean;
-            /*int result = stmt.executeUpdate(returnUpdateSql(loginBean));
-            bean.setResultCode(result);
-            if (result == 0)
-                bean.setResultMsg("用户不存在，请注册");
-            return bean;*/
-        } catch (Exception e) {
-            e.printStackTrace();
-            return errorBean(bean, e);
         } finally {
             StreamUtil.close(null, conn, pre);
         }

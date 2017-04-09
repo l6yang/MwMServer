@@ -6,6 +6,7 @@ import com.mwm.loyal.beans.LoginBean;
 import com.mwm.loyal.beans.ResultBean;
 import com.mwm.loyal.dao.DataUtil;
 import com.mwm.loyal.imp.Contact;
+import com.mwm.loyal.utils.FileUtil;
 import com.mwm.loyal.utils.GsonUtil;
 import com.mwm.loyal.utils.StringUtil;
 import org.apache.commons.fileupload.FileItem;
@@ -104,9 +105,10 @@ public class AndroidAction extends MultiActionController implements Contact {
 
     @RequestMapping(params = "method=doDownLoadApk")
     public void doDownLoadApk(HttpServletRequest request, HttpServletResponse response) {
-        System.out.println("android Action：：doDownLoadApk");
         try {
             response.setCharacterEncoding("utf-8");
+            response.setContentType("application/octet-stream;charset=UTF-8");
+            response.setHeader("Content-Disposition", "attachment; filename=\"mwm.apk\"");
             DataUtil.doDownLoadApk(response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -210,7 +212,7 @@ public class AndroidAction extends MultiActionController implements Contact {
                     } else apkVer = filename;
                     String path = request.getSession().getServletContext().getRealPath("/apk");
                     File file = new File(path, "mwm_" + apkVer + ".apk");
-                    boolean delete = !file.exists() || file.delete();
+                    FileUtil.deleteFile(file);
                     OutputStream outs = new FileOutputStream(file);
                     int length;
                     byte[] buf = new byte[1024];

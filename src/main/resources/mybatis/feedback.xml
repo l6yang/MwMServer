@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.mwm.loyal.resources">
+
+    <select id="queryAll" parameterType="com.mwm.loyal.model.FeedBackBean"
+            resultType="com.mwm.loyal.model.FeedBackBean">
+        SELECT *
+        FROM MWM_FEEDBACK
+    </select>
+
+    <select id="queryByAccount" parameterType="String"
+            resultType="com.mwm.loyal.model.FeedBackBean">
+        SELECT *
+        FROM MWM_FEEDBACK
+        WHERE ACCOUNT = #{account}
+    </select>
+
+    <insert id="insertFeedBack" parameterType="com.mwm.loyal.model.FeedBackBean">
+        INSERT
+        INTO MWM_FEEDBACK (ACCOUNT, CONTENT, TIME)
+        VALUES (#{account}, #{content}, #{time})
+    </insert>
+
+    <update id="deleteFeedBack" parameterType="String">
+        DELETE FROM MWM_FEEDBACK
+        WHERE ACCOUNT = #{account}
+    </update>
+</mapper>

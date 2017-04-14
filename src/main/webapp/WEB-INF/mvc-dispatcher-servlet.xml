@@ -28,7 +28,45 @@
     <bean id="paramResolver" class="org.springframework.web.servlet.mvc.multiaction.ParameterMethodNameResolver">
         <property name="paramName" value="method"/>
     </bean>
+
     <bean name="/action.do" class="com.mwm.loyal.action.AndroidAction">
         <property name="methodNameResolver" ref="paramResolver"/>
+        <property name="service" ref="androidService"/>
     </bean>
+    <!--数据库-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="oracle.jdbc.OracleDriver"/>
+        <property name="url" value="jdbc:oracle:thin:@localhost:1521:orcl"/>
+        <property name="username" value="loyal"/>
+        <!-- 数据库密码... -->
+        <property name="password" value="111111"/>
+    </bean>
+    <!---->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="configLocation" value="classpath:mybatis-config.xml"/>
+        <!--Mapped Statements collection already contains value for-->
+        <!--1、遇到这种问题通常原因有两个：
+            （1）相同的命名空间下有相同的id
+            （2）sqlSessionFactory中配置了多个xml的地址。
+            删除下面即可代码-->
+        <!--2、将mybatis-config.xml中的<mappers></mappers>删除或注销-->
+        <property name="mapperLocations" value="classpath:mybatis/*.xml"/>
+    </bean>
+
+    <bean id="sessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+        <constructor-arg index="0" ref="sqlSessionFactory"/>
+    </bean>
+    <!--Service-->
+    <bean id="androidService" class="com.mwm.loyal.service.AndroidService">
+        <property name="androidDao" ref="dao"/>
+    </bean>
+    <!--dao-->
+    <bean id="dao" class="com.mwm.loyal.dao.AndroidDao">
+        <property name="sessionTemplate" ref="sessionTemplate"/>
+    </bean>
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!--<import resource="classpath:mybatis-config.xml"/>-->
 </beans>

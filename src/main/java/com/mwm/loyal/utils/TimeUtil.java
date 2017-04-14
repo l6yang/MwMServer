@@ -11,12 +11,12 @@ import java.util.Locale;
 
 public class TimeUtil implements Contact {
     public static String getWeek() {
-        SimpleDateFormat format = new SimpleDateFormat(Str.TIME_WEEK, Locale.CHINA);
+        SimpleDateFormat format = new SimpleDateFormat(Str.TIME_WEEK, Locale.SIMPLIFIED_CHINESE);
         return StringUtil.replaceTime(format.format(new Date()));
     }
 
     private static SimpleDateFormat setFormat(String format) {
-        return new SimpleDateFormat(format, Locale.CHINA);
+        return new SimpleDateFormat(format, Locale.SIMPLIFIED_CHINESE);
     }
 
     public static String getDate() {
@@ -41,7 +41,7 @@ public class TimeUtil implements Contact {
     }
 
     public static String getDate(String time) {
-        SimpleDateFormat format = new SimpleDateFormat(time, Locale.CHINA);
+        SimpleDateFormat format = new SimpleDateFormat(time, Locale.SIMPLIFIED_CHINESE);
         return StringUtil.replaceTime(format.format(new Date()));
     }
 

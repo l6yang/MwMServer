@@ -7,7 +7,7 @@ public class LoginBean {
     private String password;
     private String nickname;
     private Blob icon;
-    private String signature;
+    private String sign;
     private String mac;
     private String device;
     private String lock;//-1表示帐号被锁
@@ -20,12 +20,12 @@ public class LoginBean {
         this.password = password;
     }
 
-    public LoginBean(String account, String password, String nickname, Blob icon, String signature) {
+    public LoginBean(String account, String password, String nickname, Blob icon, String sign) {
         this.account = account;
         this.nickname = nickname;
         this.password = password;
         this.icon = icon;
-        this.signature = signature;
+        this.sign = sign;
     }
 
     public String getAccount() {
@@ -60,12 +60,12 @@ public class LoginBean {
         this.icon = icon;
     }
 
-    public String getSignature() {
-        return signature;
+    public String getSign() {
+        return sign;
     }
 
-    public void setSignature(String signature) {
-        this.signature = signature;
+    public void setSign(String sign) {
+        this.sign = sign;
     }
 
     public String getDevice() {

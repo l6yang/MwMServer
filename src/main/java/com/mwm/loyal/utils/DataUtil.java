@@ -1,8 +1,10 @@
-package com.mwm.loyal.dao;
+package com.mwm.loyal.utils;
 
-import com.mwm.loyal.beans.*;
+import com.mwm.loyal.beans.ContactBean;
+import com.mwm.loyal.beans.FeedBackBean;
+import com.mwm.loyal.beans.LoginBean;
+import com.mwm.loyal.beans.ResultBean;
 import com.mwm.loyal.imp.Contact;
-import com.mwm.loyal.utils.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -16,12 +18,12 @@ public class DataUtil implements Contact {
     private static final String password = "111111";
 
     private static String returnQuerySql(LoginBean loginBean) {
-        return "select * from MWM_account where M_ID='" + loginBean.getAccount() + "'";
+        return "select * from MWM_USER where ACCOUNT='" + loginBean.getAccount() + "'";
     }
 
     private static String returnFeedBackSql(FeedBackBean feedBackBean) {
         //String类型插入Oracle Date类型数据  需要通过to_date转换
-        return "insert into MWM_FEED_BACK values (to_date('" + feedBackBean.getTime() + "','yyyy-mm-dd hh24:mi:ss'),'" + feedBackBean.getAccount() + "','" + feedBackBean.getContent() + "')";
+        return "insert into MWM_FEEDBACK values (to_date('" + feedBackBean.getTime() + "','yyyy-mm-dd hh24:mi:ss'),'" + feedBackBean.getAccount() + "','" + feedBackBean.getContent() + "')";
     }
 
     public static ResultBean doRegister(LoginBean loginBean) {
@@ -30,7 +32,7 @@ public class DataUtil implements Contact {
         PreparedStatement pre = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("INSERT INTO MWM_ACCOUNT VALUES (?,?,?,?,?,?)");
+            pre = conn.prepareStatement("INSERT INTO MWM_USER VALUES (?,?,?,?,?,?)");
             pre.setString(1, loginBean.getAccount());
             pre.setString(2, loginBean.getPassword());
             pre.setString(3, loginBean.getNickname());
@@ -41,8 +43,8 @@ public class DataUtil implements Contact {
             }
             FileInputStream in = new FileInputStream(copyFile.exists() ? copyFile : file);
             pre.setBinaryStream(4, in);
-            pre.setString(5, loginBean.getSignature());
-            pre.setString(6, "0");
+            pre.setString(5, loginBean.getSign());
+            pre.setInt(6, 0);
             int result = pre.executeUpdate();
             bean.setResultCode(result);
             if (result == -1)
@@ -66,16 +68,16 @@ public class DataUtil implements Contact {
             pre = conn.prepareStatement(returnQuerySql(loginBean));
             rs = pre.executeQuery();
             if (rs.next()) {
-                String password = StringUtil.replaceNull(rs.getString("m_password"));
-                String lock = StringUtil.replaceNull(rs.getString("m_lock"));
+                String password = StringUtil.replaceNull(rs.getString("password"));
+                int lock = rs.getInt("locked");
                 if (loginBean.getPassword().equals(password)) {
-                    if (lock.equals("1")) {
+                    if (lock == 1) {
                         if (doLoginSameDevice(loginBean)) {
                             int code = accountSetStates(loginBean);
                             bean.setResultCode(code);
                             if (code == 1) {
-                                bean.setResultMsg(rs.getString("m_nickname"));
-                                bean.setExceptMsg(rs.getString("m_signature"));
+                                bean.setResultMsg(rs.getString("nickname"));
+                                bean.setExceptMsg(rs.getString("sign"));
                             }
                         } else {
                             bean.setResultCode(-1);
@@ -85,8 +87,8 @@ public class DataUtil implements Contact {
                         int code = accountSetStates(loginBean);
                         bean.setResultCode(code);
                         if (code == 1) {
-                            bean.setResultMsg(rs.getString("m_nickname"));
-                            bean.setExceptMsg(rs.getString("m_signature"));
+                            bean.setResultMsg(rs.getString("nickname"));
+                            bean.setExceptMsg(rs.getString("sign"));
                         }
                     }
                 } else {
@@ -113,13 +115,13 @@ public class DataUtil implements Contact {
         ResultSet rs = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT *FROM MWM_account where M_ID=?");
+            pre = conn.prepareStatement("SELECT *FROM MWM_USER WHERE ACCOUNT=?");
             pre.setString(1, account);
             rs = pre.executeQuery();
             if (rs.next()) {
                 bean.setResultCode(1);
-                bean.setResultMsg(rs.getString("m_nickname"));
-                bean.setExceptMsg(rs.getString("m_signature"));
+                bean.setResultMsg(rs.getString("nickname"));
+                bean.setExceptMsg(rs.getString("sign"));
             } else
                 bean.setResultCode(-1);
             return bean;
@@ -141,11 +143,11 @@ public class DataUtil implements Contact {
         ResultSet rs = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT M_DEVICE , M_MAC from MWM_ACCOUNT_SECURITY  where M_ACCOUNT=? ");
+            pre = conn.prepareStatement("SELECT DEVICE,SERIAL FROM MWM_SAFETY  WHERE ACCOUNT=? ");
             pre.setString(1, loginBean.getAccount());
             rs = pre.executeQuery();
             while (rs.next()) {
-                lockList.add(rs.getString("M_DEVICE") + "," + rs.getString("M_MAC"));
+                lockList.add(rs.getString("DEVICE") + "," + rs.getString("SERIAL"));
             }
             return lockList.contains(loginBean.getDevice() + "," + loginBean.getMac());
         } catch (Exception e) {
@@ -168,7 +170,7 @@ public class DataUtil implements Contact {
             pre = conn.prepareStatement(returnQuerySql(loginBean));
             rs = pre.executeQuery();
             if (rs.next()) {
-                Blob blob = rs.getBlob("m_icon");
+                Blob blob = rs.getBlob("icon");
                 if (blob != null) {
                     in = blob.getBinaryStream();
                     byte[] data = new byte[(int) blob.length()];
@@ -266,9 +268,9 @@ public class DataUtil implements Contact {
             conn = getConnection();
             switch (state) {
                 case "personal":
-                    pre = conn.prepareStatement("UPDATE  MWM_ACCOUNT SET  M_NICKNAME= ? , M_SIGNATURE= ? WHERE M_ID= ?");
+                    pre = conn.prepareStatement("UPDATE  MWM_USER SET  NICKNAME= ? , SIGN= ? WHERE ACCOUNT= ?");
                     pre.setString(1, loginBean.getNickname());
-                    pre.setString(2, loginBean.getSignature());
+                    pre.setString(2, loginBean.getSign());
                     pre.setString(3, loginBean.getAccount());
                     int result = pre.executeUpdate();
                     bean.setResultCode(result);
@@ -278,16 +280,16 @@ public class DataUtil implements Contact {
                         bean.setResultMsg("更新资料失败");
                     else if (result == 1) {
                         bean.setResultMsg(loginBean.getNickname());
-                        bean.setExceptMsg(loginBean.getSignature());
+                        bean.setExceptMsg(loginBean.getSign());
                     }
                     break;
                 case "password":
-                    pre = conn.prepareStatement("SELECT *FROM MWM_ACCOUNT WHERE M_PASSWORD=? AND M_ID=?");
+                    pre = conn.prepareStatement("SELECT *FROM MWM_USER WHERE PASSWORD=? AND ACCOUNT=?");
                     pre.setString(1, oldPassWord);
                     pre.setString(2, loginBean.getAccount());
                     rst = pre.executeQuery();
                     if (rst.next()) {
-                        pre = conn.prepareStatement("UPDATE MWM_ACCOUNT SET M_PASSWORD= ? WHERE M_ID= ?");
+                        pre = conn.prepareStatement("UPDATE MWM_USER SET PASSWORD= ? WHERE ACCOUNT= ?");
                         pre.setString(1, loginBean.getPassword());
                         pre.setString(2, loginBean.getAccount());
                         result = pre.executeUpdate();
@@ -300,13 +302,13 @@ public class DataUtil implements Contact {
                     }
                     break;
                 case "lock":
-                    pre = conn.prepareStatement("UPDATE MWM_ACCOUNT SET M_LOCK=? WHERE M_ID=?");
+                    pre = conn.prepareStatement("UPDATE MWM_USER SET LOCKED=? WHERE ACCOUNT=?");
                     String lock = StringUtil.replaceNull(loginBean.getLock());
                     pre.setString(1, loginBean.getLock());
                     pre.setString(2, loginBean.getAccount());
                     result = pre.executeUpdate();
                     if (result == 1) {
-                        pre = conn.prepareStatement("INSERT INTO MWM_ACCOUNT_SECURITY VALUES (?,?,?,?)");
+                        pre = conn.prepareStatement("INSERT INTO MWM_SAFETY VALUES (?,?,?,?)");
                         pre.setString(1, loginBean.getAccount());
                         pre.setTimestamp(2, TimeUtil.getTimestamp());
                         pre.setString(3, loginBean.getDevice());
@@ -338,12 +340,12 @@ public class DataUtil implements Contact {
         ResultSet rst = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT M_LOCK FROM MWM_ACCOUNT WHERE M_ID=?");
+            pre = conn.prepareStatement("SELECT LOCKED FROM MWM_USER WHERE ACCOUNT=?");
             pre.setString(1, account);
             rst = pre.executeQuery();
             if (rst.next()) {
                 bean.setResultCode(1);
-                bean.setResultMsg(rst.getString("m_lock"));
+                bean.setResultMsg(String.valueOf(rst.getInt("locked")));
             } else {
                 bean.setResultCode(-1);
                 bean.setResultMsg("未找到该账号记录");
@@ -363,7 +365,7 @@ public class DataUtil implements Contact {
         PreparedStatement pre = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("UPDATE  MWM_ACCOUNT SET M_ICON= ? WHERE M_ID= ?");
+            pre = conn.prepareStatement("UPDATE  MWM_USER SET ICON= ? WHERE ACCOUNT= ?");
             pre.setBlob(1, inputStream);
             pre.setString(2, account);
             int result = pre.executeUpdate();
@@ -388,14 +390,14 @@ public class DataUtil implements Contact {
         ResultSet resultSet = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT * FROM MWM_VER");
+            pre = conn.prepareStatement("SELECT * FROM MWM_UPDATE");
             resultSet = pre.executeQuery();
             while (resultSet.next()) {
-                int result = deleteApk(resultSet.getString("apk_version"));
+                int result = deleteApk(resultSet.getString("version"));
                 if (result != 1)
                     break;
             }
-            pre = conn.prepareStatement("INSERT INTO MWM_VER VALUES (?,?,?,?,?)");
+            pre = conn.prepareStatement("INSERT INTO MWM_UPDATE VALUES (?,?,?,?,?)");
             pre.setString(1, apkName);
             pre.setString(2, version);
             pre.setBlob(3, inputStream);
@@ -418,7 +420,7 @@ public class DataUtil implements Contact {
         Connection conn = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("DELETE FROM MWM_VER WHERE apk_version =?");
+            pre = conn.prepareStatement("DELETE FROM MWM_UPDATE WHERE version =?");
             pre.setString(1, appVer);
             return pre.executeUpdate();
         } catch (ClassNotFoundException | SQLException e) {
@@ -435,37 +437,8 @@ public class DataUtil implements Contact {
         return DriverManager.getConnection(url, user, password);
     }
 
-    /**
-     * 账号最近登录历史
-     */
-    private static List<String> accountNearStates(String account) {
-        List<String> nearList = new ArrayList<>();
-        nearList.clear();
-        Connection conn = null;
-        PreparedStatement pre = null;
-        ResultSet resultSet = null;
-        try {
-            conn = getConnection();
-            String nowTime = TimeUtil.getDateTime();
-            String before = TimeUtil.beforeMonth(nowTime, Contact.Str.TIME_ALL, 1);
-            pre = conn.prepareStatement("SELECT * FROM MWM_ACCOUNT_SECURITY WHERE M_ACCOUNT= ? AND M_TIME BETWEEN ? AND ?");
-            pre.setString(1, account);
-            pre.setTimestamp(2, TimeUtil.date2Timestamp(before));
-            pre.setTimestamp(3, TimeUtil.date2Timestamp(nowTime));
-            resultSet = pre.executeQuery();
-            while (resultSet.next()) {
-                nearList.add(resultSet.getString("m_DEVICE"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            StreamUtil.close(resultSet, conn, pre);
-        }
-        return nearList;
-    }
-
     //从数据库中查找是否有新版本
-    public static ResultBean queryApkVersion(String port,String apkVer) {
+    public static ResultBean queryApkVersion(String port, String apkVer) {
         List<ResultBean> beanList = new ArrayList<>();
         ResultBean bean = new ResultBean();
         Connection conn = null;
@@ -473,12 +446,12 @@ public class DataUtil implements Contact {
         ResultSet resultSet = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT * FROM MWM_VER WHERE APK_ZT= ? AND APK_VERSION>? order by APK_TIME desc");
+            pre = conn.prepareStatement("SELECT * FROM MWM_UPDATE WHERE ZT= ? AND VERSION>? ORDER BY  TIME DESC");
             pre.setString(1, "1");
             pre.setString(2, apkVer);
             resultSet = pre.executeQuery();
             while (resultSet.next()) {
-                String apkUrl = "http://192.168.0.66:" + port + "/mwm/apk/mwm_" + resultSet.getString("apk_version") + ".apk";
+                String apkUrl = "http://192.168.0.66:" + port + "/mwm/apk/mwm_" + resultSet.getString("version") + ".apk";
                 beanList.add(new ResultBean(1, "检查到新版本", apkUrl));
             }
             return beanList.isEmpty() ? new ResultBean(-1, "当前已是最新版本", null) : beanList.get(0);
@@ -496,18 +469,18 @@ public class DataUtil implements Contact {
         PreparedStatement pre = null;
         try {
             conn = getConnection();
-            pre = conn.prepareStatement("SELECT * FROM MWM_ACCOUNT_SECURITY WHERE M_ACCOUNT=?");
+            pre = conn.prepareStatement("SELECT * FROM MWM_SAFETY WHERE ACCOUNT=?");
             pre.setString(1, loginBean.getAccount());
             int result = pre.executeUpdate();
             if (result == 1) {
-                pre = conn.prepareStatement("UPDATE MWM_ACCOUNT_SECURITY SET M_TIME=?,M_DEVICE=?,M_MAC=? WHERE M_ACCOUNT=?");
+                pre = conn.prepareStatement("UPDATE MWM_SAFETY SET TIME=?,DEVICE=?,SERIAL=? WHERE ACCOUNT=?");
                 pre.setTimestamp(1, TimeUtil.date2Timestamp(TimeUtil.getDateTime()));
                 pre.setString(2, loginBean.getDevice());
                 pre.setString(3, loginBean.getMac());
                 pre.setString(4, loginBean.getAccount());
                 return pre.executeUpdate();
             } else {
-                pre = conn.prepareStatement("INSERT INTO MWM_ACCOUNT_SECURITY VALUES (?,?,?,?)");
+                pre = conn.prepareStatement("INSERT INTO MWM_SAFETY VALUES (?,?,?,?)");
                 pre.setString(1, loginBean.getAccount());
                 pre.setTimestamp(2, TimeUtil.date2Timestamp(TimeUtil.getDateTime()));
                 pre.setString(3, loginBean.getDevice());

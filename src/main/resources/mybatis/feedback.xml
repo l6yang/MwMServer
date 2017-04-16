@@ -19,11 +19,11 @@
     <insert id="insertFeedBack" parameterType="com.mwm.loyal.model.FeedBackBean">
         INSERT
         INTO MWM_FEEDBACK (ACCOUNT, CONTENT, TIME)
-        VALUES (#{account}, #{content}, #{time})
+        VALUES (#{account}, #{content}, sysdate)
     </insert>
 
     <update id="deleteFeedBack" parameterType="String">
         DELETE FROM MWM_FEEDBACK
-        WHERE ACCOUNT = #{account}
+        WHERE ACCOUNT = #{account} AND CONTENT=#{content}
     </update>
 </mapper>

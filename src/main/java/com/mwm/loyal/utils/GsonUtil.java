@@ -4,25 +4,30 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.gson.stream.JsonReader;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
 public class GsonUtil {
     public static <T> T getBeanFromJson(String json, Class<T> tClass) {
-        try {
-            Gson gson = new Gson();
-            return gson.fromJson(json, tClass);
-        } catch (Exception e) {
-            return null;
-        }
+        Gson gson = new Gson();
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setLenient(true);
+        return gson.fromJson(reader, tClass);
     }
 
     public static <T> T getBeanFromJson(HttpServletRequest request, String param, Class<T> tClass) {
         String json = request.getParameter(param);
-        System.out.println(json + " : " + tClass.getName());
         return getBeanFromJson(json, tClass);
+    }
+
+    public static <T> String beanToJson(Object tClass) {
+        if (null == tClass)
+            return "{}";
+        return new Gson().toJson(tClass);
     }
 
     public static <T> List<T> getBeanListFromJson(String json, Class<T> tClass) {

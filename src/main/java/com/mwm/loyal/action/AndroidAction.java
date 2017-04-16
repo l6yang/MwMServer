@@ -2,10 +2,10 @@ package com.mwm.loyal.action;
 
 import com.google.gson.Gson;
 import com.mwm.loyal.beans.ContactBean;
-import com.mwm.loyal.beans.LoginBean;
 import com.mwm.loyal.beans.ResultBean;
 import com.mwm.loyal.imp.Contact;
 import com.mwm.loyal.model.AccountBean;
+import com.mwm.loyal.model.FeedBackBean;
 import com.mwm.loyal.service.BaseAndroidService;
 import com.mwm.loyal.utils.*;
 import org.apache.commons.fileupload.FileItem;
@@ -23,6 +23,7 @@ import java.util.List;
 
 @RequestMapping("/mwm/action.do")
 public class AndroidAction extends MultiActionController implements Contact {
+    private BaseAndroidService service;
 
     @RequestMapping(params = "method=doRegister")
     public void doRegister(HttpServletRequest request, HttpServletResponse response) {
@@ -34,12 +35,18 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(json)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
-            LoginBean loginBean = GsonUtil.getBeanFromJson(json, LoginBean.class);
-            resultBean = DataUtil.doRegister(loginBean);
-            writer.print(resultBean);
+            System.out.println("register:" + json);
+            AccountBean registerBean = GsonUtil.getBeanFromJson(json, AccountBean.class);
+            AccountBean accountBean = service.getUserByAccount(registerBean);
+            if (null == accountBean) {
+                registerBean.setIcon(StreamUtil.fileToByte("E:\\IntelliJ Space\\MwMServer\\src\\main\\webapp\\images\\mwm.jpg"));
+                int code = service.registerAccount(registerBean);
+                resultBean = new ResultBean(code, code == 1 ? "" : "注册失败");
+            } else resultBean = new ResultBean(-1, "账号已存在");
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -57,7 +64,7 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(json)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             AccountBean accountBean = service.loginByAccount(GsonUtil.getBeanFromJson(json, AccountBean.class));
@@ -66,7 +73,7 @@ public class AndroidAction extends MultiActionController implements Contact {
             } else {
                 resultBean = new ResultBean(1, accountBean.getNickname(), accountBean.getSign());
             }
-            writer.print(resultBean);
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -85,14 +92,14 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(account) || emptyJson(password)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             AccountBean accountBean = service.loginByAccount(new AccountBean(account, password));
             if (null == accountBean) {
                 resultBean = new ResultBean(-1, "用户名或密码不正确");
             } else resultBean = new ResultBean(1, accountBean.getNickname(), accountBean.getSign());
-            writer.print(resultBean);
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -110,14 +117,14 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(account)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             AccountBean accountBean = service.getUserByAccount(new AccountBean(account));
             if (null == accountBean) {
                 resultBean = new ResultBean(-1, "用户名或密码不正确");
             } else resultBean = new ResultBean(1, accountBean.getNickname(), accountBean.getSign());
-            writer.print(resultBean);
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -168,9 +175,32 @@ public class AndroidAction extends MultiActionController implements Contact {
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
-            LoginBean loginBean = GsonUtil.getBeanFromJson(request, "json_update", LoginBean.class);
-            ResultBean bean = DataUtil.doUpdate(loginBean, getReqParams(request, "update_state"), getReqParams(request, "old_data"));
-            writer.print(bean);
+            String json = getReqParams(request, "json_update");
+            System.out.println("doUpdateAccount::" + json);
+            ResultBean resultBean;
+            if (emptyJson(json)) {
+                resultBean = new ResultBean(-1, "参数不能为空");
+                writer.print(new Gson().toJson(resultBean));
+                return;
+            }
+            AccountBean updateBean = GsonUtil.getBeanFromJson(json, AccountBean.class);
+            //修改密码时用
+            String oldPassword = updateBean.getOldPassword();
+            AccountBean accountBean;
+            if ("".equals(oldPassword) || null == oldPassword) {
+                //不用验证原来的密码
+                accountBean = service.getUserByAccount(updateBean);
+            } else {
+                //需要原來的密碼
+                accountBean = service.loginByAccount(new AccountBean(updateBean.getAccount(), updateBean.getOldPassword()));
+            }
+            if (null == accountBean) {
+                resultBean = new ResultBean(-1, "用户名或密码不正确");
+            } else {
+                int code = service.updateAccount(updateBean);
+                resultBean = new ResultBean(code, code == 1 ? accountBean.getNickname() : "更新资料失败", code == 1 ? accountBean.getSign() : null);
+            }
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -188,14 +218,14 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(account)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             AccountBean accountBean = service.getUserByAccount(new AccountBean(account));
             if (null == accountBean) {
                 resultBean = new ResultBean(-1, "用户名或密码不正确");
             } else resultBean = new ResultBean(1, String.valueOf(accountBean.getLocked()));
-            writer.print(resultBean);
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -224,8 +254,8 @@ public class AndroidAction extends MultiActionController implements Contact {
                         int start = value.lastIndexOf("\\");
                         String filename = value.substring(start + 1);
                         request.setAttribute(name, filename);
-                        ResultBean bean = DataUtil.doUpdateIcon(name, item.getInputStream());
-                        writer.print(bean);
+                        ResultBean resultBean = DataUtil.doUpdateIcon(name, item.getInputStream());
+                        writer.print(new Gson().toJson(resultBean));
                     }
                 }
             }
@@ -300,12 +330,12 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(json)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             int code = service.insertFeedBack(GsonUtil.getBeanFromJson(json, com.mwm.loyal.model.FeedBackBean.class));
             resultBean = new ResultBean(code, 1 == code ? "反馈成功" : "反馈失败");
-            writer.print(resultBean);
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -342,8 +372,8 @@ public class AndroidAction extends MultiActionController implements Contact {
                 doScanJsp(request, response);
             } else {
                 ContactBean contactBean = GsonUtil.getBeanFromJson(json, ContactBean.class);
-                ResultBean bean = DataUtil.doInsertContact(contactBean);
-                writer.print(bean);
+                ResultBean resultBean = DataUtil.doInsertContact(contactBean);
+                writer.print(new Gson().toJson(resultBean));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -367,8 +397,8 @@ public class AndroidAction extends MultiActionController implements Contact {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            ResultBean bean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()), getReqParams(request, "apkVer"));
-            writer.print(bean);
+            ResultBean resultBean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()), getReqParams(request, "apkVer"));
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -386,7 +416,7 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(account)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             List<com.mwm.loyal.model.FeedBackBean> beanList = service.queryByAccount(account);
@@ -394,7 +424,31 @@ public class AndroidAction extends MultiActionController implements Contact {
                 resultBean = new ResultBean(1, "{}");
             } else
                 resultBean = new ResultBean(1, new Gson().toJson(beanList));
-            writer.print(resultBean);
+            System.out.println(new Gson().toJson(resultBean));
+            writer.print(new Gson().toJson(resultBean));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            release(writer);
+        }
+    }
+
+    @RequestMapping(params = "method=deleteSelfFeed")
+    public void deleteSelfFeed(HttpServletRequest request, HttpServletResponse response) {
+        PrintWriter writer = null;
+        response.setCharacterEncoding("utf-8");
+        try {
+            String json = getReqParams(request, "json_delete");
+            writer = response.getWriter();
+            ResultBean resultBean;
+            if (emptyJson(json)) {
+                resultBean = new ResultBean(-1, "参数不能为空");
+                writer.print(new Gson().toJson(resultBean));
+                return;
+            }
+            int code = service.deleteFeedBack(GsonUtil.getBeanFromJson(json, FeedBackBean.class));
+            resultBean = new ResultBean(code, 1 == code ? "已删除" : "删除失败");
+            writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -417,56 +471,6 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    private BaseAndroidService service;
-
-    @RequestMapping(params = "method=androidTest1")
-    public void androidTest1(HttpServletRequest request, HttpServletResponse response) {
-        PrintWriter writer = null;
-        response.setCharacterEncoding("utf-8");
-        try {
-            writer = response.getWriter();
-            String json = getReqParams(request, "json_register");
-            System.out.println("androidTest1::" + json);
-            writer = response.getWriter();
-            ResultBean resultBean;
-            if (emptyJson(json)) {
-                resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
-                return;
-            }
-            int code = service.registerAccount(GsonUtil.getBeanFromJson(json, AccountBean.class));
-            writer.print(code);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            release(writer);
-        }
-    }
-
-    @RequestMapping(params = "method=androidUpdate")
-    public void androidUpdate(HttpServletRequest request, HttpServletResponse response) {
-        PrintWriter writer = null;
-        response.setCharacterEncoding("utf-8");
-        try {
-            writer = response.getWriter();
-            String json = getReqParams(request, "json_update");
-            writer = response.getWriter();
-            ResultBean resultBean;
-            if (emptyJson(json)) {
-                resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
-                return;
-            }
-            int code = service.updateAccount(GsonUtil.getBeanFromJson(json, AccountBean.class));
-            writer.print(code);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println(e.toString());
-        } finally {
-            release(writer);
-        }
-    }
-
     @RequestMapping(params = "method=destroyAccount")
     public void destroyAccount(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
@@ -477,7 +481,7 @@ public class AndroidAction extends MultiActionController implements Contact {
             ResultBean resultBean;
             if (emptyJson(json)) {
                 resultBean = new ResultBean(-1, "参数不能为空");
-                writer.print(resultBean);
+                writer.print(new Gson().toJson(resultBean));
                 return;
             }
             AccountBean accountBean = service.getUserByAccount(GsonUtil.getBeanFromJson(json, AccountBean.class));
@@ -487,7 +491,7 @@ public class AndroidAction extends MultiActionController implements Contact {
                 int code = service.destroyAccount(accountBean);
                 resultBean = new ResultBean(code, 1 == code ? "删除成功" : "删除失败");
             }
-            writer.print(resultBean);
+            writer.print(new Gson().toJson(resultBean));
         } catch (IOException e) {
             e.printStackTrace();
         } finally {

@@ -1,15 +1,11 @@
 package com.mwm.loyal;
 
 
+import com.mwm.loyal.imp.Contact;
 import com.mwm.loyal.model.AccountBean;
-import com.mwm.loyal.utils.StreamUtil;
-import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
-import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+import com.mwm.loyal.utils.GsonUtil;
+import com.mwm.loyal.utils.TimeUtil;
 
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Date;
 
 public class Main {
@@ -29,5 +25,6 @@ public class Main {
         } finally {
             StreamUtil.close(reader);
         }*/
+        System.out.println(TimeUtil.getDate(new Date(), Contact.Str.TIME_ALL));
     }
 }

@@ -21,13 +21,12 @@ public class AndroidDao implements BaseAndroidDao {
 
     @Override
     public int registerAccount(AccountBean accountBean) {
-        System.out.println("AndroidDao::" + accountBean.toString());
-        return sessionTemplate.insert("registerAccountbbb", accountBean);
+        return sessionTemplate.insert("registerAccount", accountBean);
     }
 
     @Override
     public int updateAccount(AccountBean bean) {
-        return sessionTemplate.update("updateAccountaa", bean);
+        return sessionTemplate.update("updateAccount", bean);
     }
 
     @Override

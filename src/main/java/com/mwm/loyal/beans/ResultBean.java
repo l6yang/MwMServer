@@ -43,11 +43,11 @@ public class ResultBean {
     public ResultBean() {
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return "{\"resultCode\":" + resultCode +
                 ",\"resultMsg\":" + (resultMsg == null ? null : "\"" + resultMsg + "\"") +
                 ",\"exceptMsg\":" + (exceptMsg == null ? null : "\"" + exceptMsg + "\"") +
                 "}";
-    }
+    }*/
 }

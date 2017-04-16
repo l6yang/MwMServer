@@ -17,15 +17,31 @@
         WHERE ACCOUNT = #{account}
     </select>
 
-    <insert id="registerAccountbbb" parameterType="com.mwm.loyal.model.AccountBean">
+    <insert id="registerAccount" parameterType="com.mwm.loyal.model.AccountBean">
         INSERT
-        INTO MWM_USER (ACCOUNT, PASSWORD, NICKNAME)
-        VALUES (#{account}, #{password}, #{nickname})
+        INTO MWM_USER (ACCOUNT,PASSWORD,NICKNAME,ICON)
+        VALUES (#{account}, #{password}, #{nickname},#{icon})
     </insert>
 
-    <update id="updateAccountaa" parameterType="com.mwm.loyal.model.AccountBean">
+    <update id="updateAccount" parameterType="com.mwm.loyal.model.AccountBean">
         UPDATE MWM_USER
-        SET NICKNAME = #{nickname}
+        <set>
+            <if test="password!=null and password!=''">
+                PASSWORD=#{password},
+            </if>
+            <if test="nickname!=null and nickname!=''">
+                NICKNAME=#{nickname},
+            </if>
+            <if test="icon!=null">
+                ICON=#{icon},
+            </if>
+            <if test="sign!=null and sign!=''">
+                SIGN=#{sign},
+            </if>
+            <if test="locked!=null">
+                locked=#{locked}
+            </if>
+        </set>
         WHERE ACCOUNT = #{account}
     </update>
     <update id="destroyAccount" parameterType="com.mwm.loyal.model.AccountBean">

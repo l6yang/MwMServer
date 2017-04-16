@@ -21,7 +21,6 @@ public class AndroidService implements BaseAndroidService {
 
     @Override
     public int registerAccount(AccountBean bean) {
-        System.out.println("AndroidService::" + bean.toString());
         return androidDao.registerAccount(bean);
     }
 

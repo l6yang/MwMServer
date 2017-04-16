@@ -7,6 +7,7 @@ public class AccountBean {
     private byte[] icon;
     private String sign;
     private int locked = 0;
+    private String oldPassword;
 
     public AccountBean() {
     }
@@ -20,13 +21,14 @@ public class AccountBean {
         this.password = password;
     }
 
-    public AccountBean(String account, String password, String nickname, byte[] icon, String sign, int locked) {
+    public AccountBean(String account, String password, String nickname, byte[] icon, String sign, int locked, String oldPassword) {
         this.account = account;
         this.password = password;
         this.nickname = nickname;
         this.icon = icon;
         this.sign = sign;
         this.locked = locked;
+        this.oldPassword = oldPassword;
     }
 
     public String getAccount() {
@@ -77,15 +79,11 @@ public class AccountBean {
         this.locked = locked;
     }
 
-    @Override
-    public String toString() {
-        return "{" +
-                "account='" + account + '\'' +
-                ", password='" + password + '\'' +
-                ", nickname='" + nickname + '\'' +
-                ", icon=" + icon.length +
-                ", sign='" + sign + '\'' +
-                ", locked=" + locked +
-                '}';
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
     }
 }

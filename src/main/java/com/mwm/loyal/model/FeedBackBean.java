@@ -1,20 +1,21 @@
 package com.mwm.loyal.model;
 
-import com.mwm.loyal.imp.Contact;
-import com.mwm.loyal.utils.TimeUtil;
-
-import java.sql.Timestamp;
-import java.util.Date;
-
 public class FeedBackBean {
     private String account;
     private String content;
-    private Timestamp time;
+    private String time;
 
-    public FeedBackBean(String account, String content, Timestamp time) {
-        this.time = time;
+    public FeedBackBean() {
+    }
+
+    public FeedBackBean(String account) {
+        this.account = account;
+    }
+
+    public FeedBackBean(String account, String content, String time) {
         this.account = account;
         this.content = content;
+        this.time = time;
     }
 
     public String getAccount() {
@@ -33,17 +34,17 @@ public class FeedBackBean {
         this.content = content;
     }
 
-    public Timestamp getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Timestamp time) {
+    public void setTime(String time) {
         this.time = time;
     }
 
     @Override
     public String toString() {
-        return "{\"time\":" + (time == null ? null : "\"" + TimeUtil.getDate(new Date(time.getTime()), Contact.Str.TIME_ALL) + "\"") +
+        return "{\"time\":" + (time == null ? null : "\"" + time + "\"") +
                 ",\"account\":" + (account == null ? null : "\"" + account + "\"") +
                 ",\"content\":" + (content == null ? null : "\"" + content + "\"") +
                 "}";

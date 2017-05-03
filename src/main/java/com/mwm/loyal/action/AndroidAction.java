@@ -67,11 +67,15 @@ public class AndroidAction extends MultiActionController implements Contact {
                 writer.print(new Gson().toJson(resultBean));
                 return;
             }
-            AccountBean accountBean = service.loginByAccount(GsonUtil.getBeanFromJson(json, AccountBean.class));
-            if (null == accountBean) {
-                resultBean = new ResultBean(-1, "用户名或密码不正确");
-            } else {
-                resultBean = new ResultBean(1, accountBean.getNickname(), accountBean.getSign());
+            try {
+                AccountBean accountBean = service.loginByAccount(GsonUtil.getBeanFromJson(json, AccountBean.class));
+                if (null == accountBean) {
+                    resultBean = new ResultBean(-1, "用户名或密码不正确");
+                } else {
+                    resultBean = new ResultBean(1, accountBean.getNickname(), accountBean.getSign());
+                }
+            } catch (Exception e) {
+                resultBean = new ResultBean(-1, e.getMessage());
             }
             writer.print(new Gson().toJson(resultBean));
         } catch (Exception e) {

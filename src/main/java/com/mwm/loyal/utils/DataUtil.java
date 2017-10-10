@@ -451,7 +451,7 @@ public class DataUtil implements Contact {
             pre.setString(2, apkVer);
             resultSet = pre.executeQuery();
             while (resultSet.next()) {
-                String apkUrl = "http://192.168.0.66:" + port + "/mwm/apk/mwm_" + resultSet.getString("version") + ".apk";
+                String apkUrl = "http://192.168.1.15:" + port + "/mwm/apk/mwm_" + resultSet.getString("version") + ".apk";
                 beanList.add(new ResultBean(1, "检查到新版本", apkUrl));
             }
             return beanList.isEmpty() ? new ResultBean(-1, "当前已是最新版本", null) : beanList.get(0);

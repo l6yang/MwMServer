@@ -144,6 +144,7 @@ public class AndroidAction extends MultiActionController implements Contact {
         try {
             outputStream = response.getOutputStream();
             String account = getReqParams(request, "account");
+            System.out.println("doShowIconByIO::"+account);
             if (emptyJson(account)) {
                 outputStream.write(0);
                 return;

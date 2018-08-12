@@ -85,6 +85,42 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
+    @RequestMapping(params = "method=testLogin")
+    public void testLogin(HttpServletRequest request, HttpServletResponse response) {
+        PrintWriter writer = null;
+        try {
+            writer = response.getWriter();
+            response.setCharacterEncoding("utf-8");
+            String account = getReqParams(request, "account");
+            String password = getReqParams(request, "password");
+            ResultBean resultBean = new ResultBean();
+            if (null == account || account.isEmpty()) {
+                resultBean.setResultCode(-1);
+                resultBean.setResultMsg("用户名不能为空！");
+                writer.print(new Gson().toJson(resultBean));
+                return;
+            }
+            if (null == password || password.isEmpty()) {
+                resultBean.setResultCode(-1);
+                resultBean.setResultMsg("密码不能为空！");
+                writer.print(new Gson().toJson(resultBean));
+                return;
+            }
+            if ("admin".equals(account) && "admin".equals(password)) {
+                resultBean.setResultCode(1);
+                resultBean.setResultMsg("登录成功！");
+            } else {
+                resultBean.setResultCode(-1);
+                resultBean.setResultMsg("用户名或密码错误！");
+            }
+            writer.print(new Gson().toJson(resultBean));
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            release(writer);
+        }
+    }
+
     @RequestMapping(params = "method=doLoginWithJson")
     public void doLoginWithJson(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
@@ -144,7 +180,7 @@ public class AndroidAction extends MultiActionController implements Contact {
         try {
             outputStream = response.getOutputStream();
             String account = getReqParams(request, "account");
-            System.out.println("doShowIconByIO::"+account);
+            System.out.println("doShowIconByIO::" + account);
             if (emptyJson(account)) {
                 outputStream.write(0);
                 return;

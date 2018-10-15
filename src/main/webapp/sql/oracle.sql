@@ -15,18 +15,6 @@
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
   TABLESPACE "USERS" ;
 --------------------------------------------------------
---  DDL for Table TEST
---------------------------------------------------------
-
-  CREATE TABLE "LOYAL"."TEST"
-   (	"YHDH" VARCHAR2(20 BYTE),
-	"HPHM" VARCHAR2(20 BYTE)
-   ) SEGMENT CREATION IMMEDIATE
-  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 NOCOMPRESS LOGGING
-  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
-  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
-  TABLESPACE "USERS" ;
---------------------------------------------------------
 --  DDL for Table MWM_USER
 --------------------------------------------------------
 
@@ -61,10 +49,10 @@
 
    COMMENT ON COLUMN "LOYAL"."MWM_USER"."LOCKED" IS '是否被设备锁定(1表示被锁，0表示未锁 )';
 --------------------------------------------------------
---  DDL for Table MWM_UPDATE
+--  DDL for Table MWM_APK
 --------------------------------------------------------
 
-  CREATE TABLE "LOYAL"."MWM_UPDATE"
+  CREATE TABLE "LOYAL"."MWM_APK"
    (	"NAME" VARCHAR2(20 BYTE),
 	"VERSION" VARCHAR2(20 BYTE) DEFAULT 0,
 	"APK" BLOB,
@@ -121,15 +109,11 @@ Insert into LOYAL.MWM_CONTACT (ACCOUNT,CONTACT,TIME) values ('1','1',null);
 Insert into LOYAL.MWM_CONTACT (ACCOUNT,CONTACT,TIME) values ('1','2',null);
 Insert into LOYAL.MWM_CONTACT (ACCOUNT,CONTACT,TIME) values ('2','2',null);
 Insert into LOYAL.MWM_CONTACT (ACCOUNT,CONTACT,TIME) values ('2','1',null);
-REM INSERTING into LOYAL.TEST
-SET DEFINE OFF;
-Insert into LOYAL.TEST (YHDH,HPHM) values ('admin','AA2008');
-Insert into LOYAL.TEST (YHDH,HPHM) values ('l6yang','ATN310');
 REM INSERTING into LOYAL.MWM_USER
 SET DEFINE OFF;
 Insert into LOYAL.MWM_USER (ACCOUNT,PASSWORD,NICKNAME,SIGN,LOCKED) values ('loyal','111111','FGERTWERT','y',0);
 Insert into LOYAL.MWM_USER (ACCOUNT,PASSWORD,NICKNAME,SIGN,LOCKED) values ('qweqeq','qwerasdf','sdfgdfg',null,0);
-REM INSERTING into LOYAL.MWM_UPDATE
+REM INSERTING into LOYAL.MWM_APK
 SET DEFINE OFF;
 REM INSERTING into LOYAL.MWM_SAFETY
 SET DEFINE OFF;
@@ -159,7 +143,7 @@ Insert into LOYAL.MWM_FEEDBACK (ACCOUNT,CONTENT,TIME) values ('loyal','3534534',
 --  DDL for Index UK_VER_VERSION
 --------------------------------------------------------
 
-  CREATE UNIQUE INDEX "LOYAL"."UK_VER_VERSION" ON "LOYAL"."MWM_UPDATE" ("VERSION")
+  CREATE UNIQUE INDEX "LOYAL"."UK_VER_VERSION" ON "LOYAL"."MWM_APK" ("VERSION")
   PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS NOCOMPRESS LOGGING
   TABLESPACE "USERS" ;
 --------------------------------------------------------
@@ -187,13 +171,7 @@ Insert into LOYAL.MWM_FEEDBACK (ACCOUNT,CONTENT,TIME) values ('loyal','3534534',
   STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
   TABLESPACE "USERS"  ENABLE;
---------------------------------------------------------
---  Constraints for Table TEST
---------------------------------------------------------
 
-  ALTER TABLE "LOYAL"."TEST" MODIFY ("YHDH" NOT NULL ENABLE);
-
-  ALTER TABLE "LOYAL"."TEST" MODIFY ("HPHM" NOT NULL ENABLE);
 --------------------------------------------------------
 --  Constraints for Table MWM_USER
 --------------------------------------------------------
@@ -208,10 +186,10 @@ Insert into LOYAL.MWM_FEEDBACK (ACCOUNT,CONTENT,TIME) values ('loyal','3534534',
 
   ALTER TABLE "LOYAL"."MWM_USER" MODIFY ("PASSWORD" NOT NULL ENABLE);
 --------------------------------------------------------
---  Constraints for Table MWM_UPDATE
+--  Constraints for Table MWM_APK
 --------------------------------------------------------
 
-  ALTER TABLE "LOYAL"."MWM_UPDATE" ADD CONSTRAINT "UK_VER_VERSION" UNIQUE ("VERSION")
+  ALTER TABLE "LOYAL"."MWM_APK" ADD CONSTRAINT "UK_VER_VERSION" UNIQUE ("VERSION")
   USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS NOCOMPRESS LOGGING
   TABLESPACE "USERS"  ENABLE;
 --------------------------------------------------------

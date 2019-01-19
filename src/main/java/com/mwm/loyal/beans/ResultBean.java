@@ -1,53 +1,54 @@
 package com.mwm.loyal.beans;
 
-public class ResultBean {
-    private int resultCode;
-    private String resultMsg;
-    private String exceptMsg;
-
-    public ResultBean(int resultCode, String resultMsg) {
-        this.resultCode = resultCode;
-        this.resultMsg = resultMsg;
-    }
-
-    public ResultBean(int resultCode, String resultMsg, String exceptMsg) {
-        this.resultCode = resultCode;
-        this.resultMsg = resultMsg;
-        this.exceptMsg = exceptMsg;
-    }
-
-    public int getResultCode() {
-        return resultCode;
-    }
-
-    public void setResultCode(int resultCode) {
-        this.resultCode = resultCode;
-    }
-
-    public String getResultMsg() {
-        return resultMsg;
-    }
-
-    public void setResultMsg(String resultMsg) {
-        this.resultMsg = resultMsg;
-    }
-
-    public String getExceptMsg() {
-        return exceptMsg;
-    }
-
-    public void setExceptMsg(String exceptMsg) {
-        this.exceptMsg = exceptMsg;
-    }
+public class ResultBean<T> {
+    private String code;
+    private String message;
+    private T obj;
 
     public ResultBean() {
     }
 
-    /*@Override
-    public String toString() {
-        return "{\"resultCode\":" + resultCode +
-                ",\"resultMsg\":" + (resultMsg == null ? null : "\"" + resultMsg + "\"") +
-                ",\"exceptMsg\":" + (exceptMsg == null ? null : "\"" + exceptMsg + "\"") +
-                "}";
-    }*/
+    public ResultBean(T obj) {
+        this.code = "1";
+        this.obj = obj;
+    }
+
+    public ResultBean(String code, String message) {
+        this.code = code;
+        this.message = message;
+    }
+
+    public ResultBean(String code, String message, T obj) {
+        this.code = code;
+        this.message = message;
+        this.obj = obj;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public void setCode(int code) {
+        setCode(String.valueOf(code));
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public T getObj() {
+        return obj;
+    }
+
+    public void setObj(T obj) {
+        this.obj = obj;
+    }
 }

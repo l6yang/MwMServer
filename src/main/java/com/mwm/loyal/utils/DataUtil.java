@@ -46,9 +46,9 @@ public class DataUtil implements Contact {
             pre.setString(5, loginBean.getSign());
             pre.setInt(6, 0);
             int result = pre.executeUpdate();
-            bean.setResultCode(result);
+            bean.setCode(result);
             if (result == -1)
-                bean.setResultMsg("用户已存在");
+                bean.setMessage("用户已存在");
             return bean;
         } catch (Exception e) {
             e.printStackTrace();
@@ -59,7 +59,7 @@ public class DataUtil implements Contact {
     }
 
     public static ResultBean doLogin(LoginBean loginBean) {
-        ResultBean bean = new ResultBean();
+        ResultBean<String> bean = new ResultBean<>();
         Connection conn = null;
         PreparedStatement pre = null;
         ResultSet rs = null;
@@ -74,30 +74,30 @@ public class DataUtil implements Contact {
                     if (lock == 1) {
                         if (doLoginSameDevice(loginBean)) {
                             int code = accountSetStates(loginBean);
-                            bean.setResultCode(code);
+                            bean.setCode(code);
                             if (code == 1) {
-                                bean.setResultMsg(rs.getString("nickname"));
-                                bean.setExceptMsg(rs.getString("sign"));
+                                bean.setMessage(rs.getString("nickname"));
+                                bean.setObj(rs.getString("sign"));
                             }
                         } else {
-                            bean.setResultCode(-1);
-                            bean.setResultMsg("当前账号已被别的设备绑定");
+                            bean.setCode(-1);
+                            bean.setMessage("当前账号已被别的设备绑定");
                         }
                     } else {
                         int code = accountSetStates(loginBean);
-                        bean.setResultCode(code);
+                        bean.setCode(code);
                         if (code == 1) {
-                            bean.setResultMsg(rs.getString("nickname"));
-                            bean.setExceptMsg(rs.getString("sign"));
+                            bean.setMessage(rs.getString("nickname"));
+                            bean.setObj(rs.getString("sign"));
                         }
                     }
                 } else {
-                    bean.setResultCode(-1);
-                    bean.setResultMsg("用户名和密码不匹配");
+                    bean.setCode(-1);
+                    bean.setMessage("用户名和密码不匹配");
                 }
             } else {
-                bean.setResultCode(-1);
-                bean.setResultMsg("用户不存在");
+                bean.setCode(-1);
+                bean.setMessage("用户不存在");
             }
             return bean;
         } catch (Exception e) {
@@ -109,7 +109,7 @@ public class DataUtil implements Contact {
     }
 
     public static ResultBean doQueryAccount(String account) {
-        ResultBean bean = new ResultBean();
+        ResultBean<String> bean = new ResultBean<>();
         Connection conn = null;
         PreparedStatement pre = null;
         ResultSet rs = null;
@@ -119,11 +119,11 @@ public class DataUtil implements Contact {
             pre.setString(1, account);
             rs = pre.executeQuery();
             if (rs.next()) {
-                bean.setResultCode(1);
-                bean.setResultMsg(rs.getString("nickname"));
-                bean.setExceptMsg(rs.getString("sign"));
+                bean.setCode(1);
+                bean.setMessage(rs.getString("nickname"));
+                bean.setObj(rs.getString("sign"));
             } else
-                bean.setResultCode(-1);
+                bean.setCode(-1);
             return bean;
         } catch (Exception e) {
             e.printStackTrace();
@@ -169,17 +169,19 @@ public class DataUtil implements Contact {
             conn = getConnection();
             pre = conn.prepareStatement(returnQuerySql(loginBean));
             rs = pre.executeQuery();
+            outputStream = response.getOutputStream();
             if (rs.next()) {
                 Blob blob = rs.getBlob("icon");
                 if (blob != null) {
                     in = blob.getBinaryStream();
                     byte[] data = new byte[(int) blob.length()];
                     in.read(data);
-                    outputStream = response.getOutputStream();
                     outputStream.write(data, 0, data.length);
-                    outputStream.flush();
+                } else {
+                    outputStream.write(0);
                 }
             }
+            outputStream.flush();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -199,8 +201,15 @@ public class DataUtil implements Contact {
                 new CopyFileThread(file, copyFile).run();
             }
             fis = new FileInputStream(copyFile.exists() ? copyFile : file);
-            byte[] data = new byte[(int) fis.getChannel().size()];
-            fis.read(data);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int length;
+            byte[] bytes = new byte[1024];
+            while ((length = fis.read(bytes)) != -1) {
+                baos.write(bytes, 0, length);
+            }
+            // byte[] data = new byte[(int) fis.getChannel().size()];
+            //fis.read(data);
+            byte[] data = baos.toByteArray();
             outputStream = response.getOutputStream();
             outputStream.write(data, 0, data.length);
             outputStream.flush();
@@ -221,9 +230,9 @@ public class DataUtil implements Contact {
             // String sql = "INSERT into MWM_FEED_BACK values (to_date('" + feedBackBean.getTime() + "','yyyy-mm-dd hh24:mi:ss'),'" + feedBackBean.getAccount() + "','" + feedBackBean.getContent() + ")";
             pre = conn.prepareStatement(returnFeedBackSql(feedBackBean));
             int result = pre.executeUpdate();
-            bean.setResultCode(result);
+            bean.setCode(result);
             if (result == -1)
-                bean.setResultMsg("用户已存在");
+                bean.setMessage("用户已存在");
             return bean;
         } catch (Exception e) {
             e.printStackTrace();
@@ -247,9 +256,9 @@ public class DataUtil implements Contact {
                 contact = contact.substring(contact.indexOf("&k=")).replace("&k=", "");
             pre.setString(3, contact.contains("&k=") ? CipherUtil.decodeStr(contact) : contact);
             int result = pre.executeUpdate();
-            bean.setResultCode(result);
+            bean.setCode(result);
             if (result == -1)
-                bean.setResultMsg("用户已存在");
+                bean.setMessage("用户已存在");
             return bean;
         } catch (Exception e) {
             e.printStackTrace();
@@ -260,7 +269,7 @@ public class DataUtil implements Contact {
     }
 
     public static ResultBean doUpdate(LoginBean loginBean, String state, String oldPassWord) {
-        ResultBean bean = new ResultBean();
+        ResultBean<String> bean = new ResultBean<>();
         Connection conn = null;
         PreparedStatement pre = null;
         ResultSet rst = null;
@@ -273,14 +282,14 @@ public class DataUtil implements Contact {
                     pre.setString(2, loginBean.getSign());
                     pre.setString(3, loginBean.getAccount());
                     int result = pre.executeUpdate();
-                    bean.setResultCode(result);
+                    bean.setCode(result);
                     if (result == 0)
-                        bean.setResultMsg("用户不存在，请注册");
+                        bean.setMessage("用户不存在，请注册");
                     else if (result == -1)
-                        bean.setResultMsg("更新资料失败");
+                        bean.setMessage("更新资料失败");
                     else if (result == 1) {
-                        bean.setResultMsg(loginBean.getNickname());
-                        bean.setExceptMsg(loginBean.getSign());
+                        bean.setMessage(loginBean.getNickname());
+                        bean.setObj(loginBean.getSign());
                     }
                     break;
                 case "password":
@@ -293,12 +302,12 @@ public class DataUtil implements Contact {
                         pre.setString(1, loginBean.getPassword());
                         pre.setString(2, loginBean.getAccount());
                         result = pre.executeUpdate();
-                        bean.setResultCode(result);
+                        bean.setCode(result);
                         if (result == 0)
-                            bean.setResultMsg("用户不存在，请注册");
+                            bean.setMessage("用户不存在，请注册");
                     } else {
-                        bean.setResultCode(-1);
-                        bean.setResultMsg("账号与密码不匹配，请检查原始密码是否输入正确");
+                        bean.setCode(-1);
+                        bean.setMessage("账号与密码不匹配，请检查原始密码是否输入正确");
                     }
                     break;
                 case "lock":
@@ -314,13 +323,13 @@ public class DataUtil implements Contact {
                         pre.setString(3, loginBean.getDevice());
                         pre.setString(4, loginBean.getMac());
                         int res = pre.executeUpdate();
-                        bean.setResultCode(res);
-                        bean.setResultMsg(lock.equals("1") ? "lock" : "unlock");
+                        bean.setCode(res);
+                        bean.setMessage(lock.equals("1") ? "lock" : "unlock");
                         if (res == 0)
-                            bean.setResultMsg("修改失败，请重试");
+                            bean.setMessage("修改失败，请重试");
                     } else {
-                        bean.setResultCode(-1);
-                        bean.setResultMsg("账号不存在，请注册");
+                        bean.setCode(-1);
+                        bean.setMessage("账号不存在，请注册");
                     }
                     break;
             }
@@ -344,11 +353,11 @@ public class DataUtil implements Contact {
             pre.setString(1, account);
             rst = pre.executeQuery();
             if (rst.next()) {
-                bean.setResultCode(1);
-                bean.setResultMsg(String.valueOf(rst.getInt("locked")));
+                bean.setCode(1);
+                bean.setMessage(String.valueOf(rst.getInt("locked")));
             } else {
-                bean.setResultCode(-1);
-                bean.setResultMsg("未找到该账号记录");
+                bean.setCode(-1);
+                bean.setMessage("未找到该账号记录");
             }
             return bean;
         } catch (Exception e) {
@@ -369,11 +378,11 @@ public class DataUtil implements Contact {
             pre.setBlob(1, inputStream);
             pre.setString(2, account);
             int result = pre.executeUpdate();
-            bean.setResultCode(result);
+            bean.setCode(result);
             if (result == 0)
-                bean.setResultMsg("用户不存在，请注册");
+                bean.setMessage("用户不存在，请注册");
             else if (result == -1)
-                bean.setResultMsg("更新失败");
+                bean.setMessage("更新失败");
             return bean;
         } catch (Exception e) {
             e.printStackTrace();
@@ -404,8 +413,8 @@ public class DataUtil implements Contact {
             pre.setTimestamp(4, TimeUtil.getTimestamp());
             pre.setString(5, "1");
             int result = pre.executeUpdate();
-            bean.setResultCode(result);
-            bean.setResultMsg(result == 1 ? "上传成功" : "上传失败");
+            bean.setCode(result);
+            bean.setMessage(result == 1 ? "上传成功" : "上传失败");
             return bean;
         } catch (Exception e) {
             e.printStackTrace();
@@ -452,9 +461,9 @@ public class DataUtil implements Contact {
             resultSet = pre.executeQuery();
             while (resultSet.next()) {
                 String apkUrl = "http://192.168.1.15:" + port + "/mwm/apk/mwm_" + resultSet.getString("version") + ".apk";
-                beanList.add(new ResultBean(1, "检查到新版本", apkUrl));
+                beanList.add(new ResultBean<>("1", "检查到新版本", apkUrl));
             }
-            return beanList.isEmpty() ? new ResultBean(-1, "当前已是最新版本", null) : beanList.get(0);
+            return beanList.isEmpty() ? new ResultBean<>("-1", "当前已是最新版本") : beanList.get(0);
         } catch (Exception e) {
             e.printStackTrace();
             return errorBean(bean, e);
@@ -514,8 +523,8 @@ public class DataUtil implements Contact {
     }
 
     private static ResultBean errorBean(ResultBean bean, Exception e) {
-        bean.setResultCode(-1);
-        bean.setResultMsg(e.getMessage());
+        bean.setCode(-1);
+        bean.setMessage(e.getMessage());
         return bean;
     }
 

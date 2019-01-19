@@ -7,46 +7,53 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class StreamUtil {
-    public static InputStream byteToInputStream(byte[] in) throws Exception {
+    public static InputStream byteToInputStream(byte[] in) {
         return new ByteArrayInputStream(in);
     }
 
-    public static byte[] fileToByte(String path) {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    public static byte[] file2ByteArray(String path) {
         FileInputStream fis = null;
         try {
             fis = new FileInputStream(new File(path));
-            byte[] bytes = new byte[1024];
-            int len;
-            while ((len = fis.read(bytes)) != -1) {
-                bos.write(bytes, 0, len);
-            }
-            return bos.toByteArray();
+            return stream2ByteArray(fis);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         } finally {
             close(fis);
-            close(bos);
         }
     }
 
-    public static byte[] blog2Byte(Blob blob) throws Exception {
-        if (blob == null)
-            return null;
-        InputStream is = null;
-        byte[] b = null;
+    public static byte[] stream2ByteArray(InputStream stream) {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
         try {
-            is = blob.getBinaryStream();
-            b = new byte[(int) blob.length()];
-            is.read(b);
-            return b;
+            byte[] bytes = new byte[1024];
+            int len;
+            while ((len = stream.read(bytes)) != -1) {
+                bos.write(bytes, 0, len);
+            }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            close(is);
+            bos.reset();
         }
-        return b;
+        return bos.toByteArray();
+    }
+
+    public static byte[] blog2ByteArray(Blob blob) {
+        if (null == blob)
+            return null;
+        InputStream inputStream = null;
+        try {
+            inputStream = blob.getBinaryStream();
+           /* b = new byte[(int) blob.length()];
+            inputStream.read(b);*/
+            return stream2ByteArray(inputStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            close(inputStream);
+        }
     }
 
     public static void close(ResultSet rs, Connection conn, PreparedStatement pre) {

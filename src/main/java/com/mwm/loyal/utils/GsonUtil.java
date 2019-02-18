@@ -12,25 +12,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GsonUtil {
-    public static <T> T getBeanFromJson(String json, Class<T> tClass) {
-        Gson gson = new Gson();
+    private static Gson gson = new Gson();
+
+    public static <T> T json2Bean(String json, Class<T> tClass) {
         JsonReader reader = new JsonReader(new StringReader(json));
         reader.setLenient(true);
         return gson.fromJson(reader, tClass);
     }
 
-    public static <T> T getBeanFromJson(HttpServletRequest request, String param, Class<T> tClass) {
+    public static <T> T json2Bean(HttpServletRequest request, String param, Class<T> tClass) {
         String json = request.getParameter(param);
-        return getBeanFromJson(json, tClass);
+        return json2Bean(json, tClass);
     }
 
-    public static <T> String beanToJson(Object tClass) {
+    public static <T> String bean2Json(Object tClass) {
         if (null == tClass)
             return "{}";
-        return new Gson().toJson(tClass);
+        return gson.toJson(tClass);
     }
 
-    public static <T> List<T> getBeanListFromJson(String json, Class<T> tClass) {
+    public static <T> List<T> json2List(String json, Class<T> tClass) {
         List<T> list = new ArrayList<>();
         try {
             if (json.isEmpty()) {
@@ -39,11 +40,12 @@ public class GsonUtil {
             }
             JsonArray array = new JsonParser().parse(json).getAsJsonArray();
             for (JsonElement elem : array) {
-                list.add((T) new Gson().fromJson(elem, tClass));
+                list.add(gson.fromJson(elem, tClass));
             }
+            return list;
         } catch (Exception e) {
-            //
+            e.printStackTrace();
+            return list;
         }
-        return list;
     }
 }

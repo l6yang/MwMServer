@@ -1,7 +1,5 @@
 package com.mwm.loyal.utils;
 
-import com.mwm.loyal.imp.Contact;
-
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -138,26 +136,24 @@ public class CipherUtil {
     /**
      * 将二进制转换成16进制
      *
-     * @param buf byte
-     * @return
+     * @param buf byte[]
      */
-
-    private static String parseByte2HexStr(byte buf[]) {
-        String sb = "";
+    private static String parseByte2HexStr(byte[] buf) {
+        StringBuilder sb = new StringBuilder();
         for (byte b : buf) {
             String hex = Integer.toHexString(b & 0xFF);
             if (hex.length() == 1) {
                 hex = '0' + hex;
             }
-            sb += (hex.toUpperCase());
+            sb.append(hex.toUpperCase());
         }
-        return sb;
+        return sb.toString();
     }
 
     /**
      * 将16进制转换为二进制
      *
-     * @param hexStr 16进制
+     * @param hexStr 16进制字符串
      */
     private static byte[] parseHexStr2Byte(String hexStr) {
         if (hexStr.length() < 1)
@@ -165,33 +161,31 @@ public class CipherUtil {
         byte[] result = new byte[hexStr.length() / 2];
         for (int i = 0; i < hexStr.length() / 2; i++) {
             int high = Integer.parseInt(hexStr.substring(i * 2, i * 2 + 1), 16);
-            int low = Integer.parseInt(hexStr.substring(i * 2 + 1, i * 2 + 2),
-                    16);
+            int low = Integer.parseInt(hexStr.substring(i * 2 + 1, i * 2 + 2), 16);
             result[i] = (byte) (high * 16 + low);
         }
         return result;
     }
 
     //注意: 这里的password(秘钥必须是16位的)
-    private static final String keyBytes = Contact.Str.KAY_ENCRYPT_DECODE;
+    private static final String keyBytes = "com.mwm.forLoyal";
 
     /**
      * 加密
      */
-    public static String encodeStr(String content) {
+    public static String encode(String content) {
         //加密之后的字节数组,转成16进制的字符串形式输出
         try {
             return parseByte2HexStr(encrypt(content, keyBytes));
         } catch (Exception e) {
-            e.printStackTrace();
+            return "";
         }
-        return "";
     }
 
     /**
      * 解密
      */
-    public static String decodeStr(String content) {
+    public static String decode(String content) {
         //解密之前,先将输入的字符串按照16进制转成二进制的字节数组,作为待解密的内容输入
         byte[] b = new byte[0];
         try {

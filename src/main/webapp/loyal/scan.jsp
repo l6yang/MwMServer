@@ -5,7 +5,7 @@
   Time: 11:10
   To change this template use File | Settings | File Templates.
 --%><%--el表达式需要添加 isELIgnored="false"--%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false" %>
+<%@ page contentType="text/html;charset=UTF-8" isELIgnored="false" %>
 <html>
 <head>
     <title>二维码页面</title>

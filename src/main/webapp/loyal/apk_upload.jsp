@@ -1,5 +1,5 @@
 <%--@elvariable id="message" type="java.lang.String"--%>
-<%@ page contentType="text/html;charset=UTF-8" language="java" isELIgnored="false" %>
+<%@ page contentType="text/html;charset=UTF-8" isELIgnored="false" %>
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -23,13 +23,13 @@
         });
         function appFileUpLoad() {
             var path = document.getElementById("app").value;
-            if (path == null || path == "") {
+            if (path == null || path === "") {
                 alert("请选择需要上传的APP文件");
                 return;
             }
             var pathLength = path.length;
             var pathEnd = path.substring(pathLength - 4, pathLength);
-            if (pathEnd != '.apk') {
+            if (pathEnd !== '.apk') {
                 alert("请选择正确的APP文件");
                 return;
             }
@@ -47,7 +47,7 @@
     </script>
 </head>
 <body>
-<form name="queryForm" method="post" action="/mwm/action.do?method=doUpdateApk" target="lister"
+<form name="queryForm" method="post" action="/mwm/action.do?method=updateApk" target="lister"
       enctype="multipart/form-data">
     <table width="75%" align="center" border="0" cellspacing="1" cellpadding="0" bgcolor="#cccccc">
         <tr>

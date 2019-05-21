@@ -1,5 +1,9 @@
 package com.mwm.loyal.action;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import com.mwm.loyal.beans.ContactBean;
 import com.mwm.loyal.beans.ResultBean;
 import com.mwm.loyal.imp.Contact;
@@ -26,12 +30,12 @@ import java.util.List;
 public class AndroidAction extends MultiActionController implements Contact {
     private BaseAndroidService service;
 
-    @RequestMapping(params = "method=mwmRegister")
-    public void mwmRegister(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=register")
+    public void register(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            String json = getReqParams(request, "beanJson");
+            String json = getRequestParams(request, "beanJson");
             if (initParams(writer, response, json)) return;
             AccountBean registerBean = GsonUtil.json2Bean(json, AccountBean.class);
             AccountBean accountBean = service.getUserByAccount(registerBean);
@@ -95,12 +99,12 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmLogin")
-    public void mwmLogin(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=loginByJson")
+    public void loginByJson(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            String json = getReqParams(request, "beanJson");
+            String json = getRequestParams(request, "beanJson");
             if (initParams(writer, response, json)) return;
             ResultBean resultBean;
             try {
@@ -121,16 +125,16 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmLoginWithJson")
-    public void mwmLoginWithJson(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=loginByParams")
+    public void loginByParams(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
-        System.out.println("mwmLoginWithJson");
+        System.out.println("loginByParams");
         try {
             response.setContentType("text/html;charset=utf-8");
             response.setCharacterEncoding("utf-8");
             writer = response.getWriter();
-            String account = getReqParams(request, "account");
-            String password = getReqParams(request, "password");
+            String account = getRequestParams(request, "account");
+            String password = getRequestParams(request, "password");
             System.out.println("account--" + account);
             System.out.println("password--" + password);
             ResultBean<AccountBean> resultBean;
@@ -151,13 +155,13 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmQueryAccount")
-    public void mwmQueryAccount(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=queryAccount")
+    public void queryAccount(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
-            String account = getReqParams(request, "account");
+            String account = getRequestParams(request, "account");
             ResultBean<AccountBean> resultBean;
             if (initParams(writer, response, account)) {
                 return;
@@ -174,14 +178,14 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmShowIconByIO")
-    public void mwmShowIconByIO(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=showAvatar")
+    public void showAvatar(HttpServletRequest request, HttpServletResponse response) {
         OutputStream outputStream = null;
         try {
             outputStream = response.getOutputStream();
-            String account = getReqParams(request, "account");
+            String account = getRequestParams(request, "account");
             response.setContentType("image/jpeg");
-            System.out.println("mwmShowIconByIO::" + account);
+            System.out.println("showAvatar::" + account);
             if (emptyJson(account)) {
                 outputStream.write(0);
                 return;
@@ -208,8 +212,8 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmDownLoadApk")
-    public void mwmDownLoadApk(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=downloadApk")
+    public void downloadApk(HttpServletRequest request, HttpServletResponse response) {
         try {
             response.setCharacterEncoding("utf-8");
             response.setContentType("application/octet-stream;charset=UTF-8");
@@ -220,13 +224,13 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmUpdateAccount")
-    public void mwmUpdateAccount(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=accountUpdate")
+    public void accountUpdate(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            String json = getReqParams(request, "beanJson");
-            System.out.println("mwmUpdateAccount::" + json);
+            String json = getRequestParams(request, "beanJson");
+            System.out.println("accountUpdate::" + json);
             ResultBean resultBean;
             if (initParams(writer, response, json)) {
                 return;
@@ -256,12 +260,12 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmAccountLocked")
-    public void mwmAccountLocked(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=accountLock")
+    public void accountLock(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            String account = getReqParams(request, "account");
+            String account = getRequestParams(request, "account");
             ResultBean<String> resultBean;
             if (initParams(writer, response, account)) {
                 return;
@@ -278,8 +282,8 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmUpdateIcon")
-    public void mwmUpdateIcon(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=updateAvatar")
+    public void updateAvatar(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
@@ -311,8 +315,8 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmUpdateApk")
-    public void mwmUpdateApk(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=updateApk")
+    public void updateApk(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
@@ -365,12 +369,12 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmFeedBack")
-    public void mwmFeedBack(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=feedback")
+    public void feedback(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            String json = getReqParams(request, "beanJson");
+            String json = getRequestParams(request, "beanJson");
             ResultBean resultBean;
             if (initParams(writer, response, json)) {
                 return;
@@ -402,18 +406,60 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmScan")
-    public void mwmScan(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=scan")
+    public void scan(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
             response.setCharacterEncoding("utf-8");
-            String param = getReqParams(request, "param");
-            String json = getReqParams(request, "beanJson");
-            if (param.isEmpty() || !param.equals("com.mwm.loyal")) {
-                doScanJsp(request, response);
+            String param = getRequestParams(request, "key");
+            if (param.isEmpty()) {
+                scanJsp(request, response);
             } else {
-                ContactBean contactBean = GsonUtil.json2Bean(json, ContactBean.class);
+                request.setAttribute("message", "信息错误");
+                request.getRequestDispatcher("/WEB-INF/page/index.jsp").forward(request, response);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            release(writer);
+        }
+    }
+
+    /**
+     * 生成二维码，返回到页面上
+     */
+    @RequestMapping(params = "method=createQrCode")
+    public void createQrCode(HttpServletRequest request, HttpServletResponse response) {
+        String url = "http://192.168.0.110:8080/mwm/apk/readme.txt";
+        response.setContentType("image/jpeg");
+        OutputStream stream = null;
+        try {
+            stream = response.getOutputStream();
+            QRCodeWriter writer = new QRCodeWriter();
+            BitMatrix m = writer.encode(url, BarcodeFormat.QR_CODE, 256,256);
+            MatrixToImageWriter.writeToStream(m, "jpg", stream);
+            stream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            IOUtil.closeStream(stream);
+        }
+    }
+
+    @RequestMapping(params = "method=addContacts")
+    public void addContacts(HttpServletRequest request, HttpServletResponse response) {
+        PrintWriter writer = null;
+        try {
+            writer = response.getWriter();
+            response.setCharacterEncoding("utf-8");
+            String param = getRequestParams(request, "key");
+            String beanJson = getRequestParams(request, "beanJson");
+            if (param.isEmpty()) {
+                writer.print("未找到此用户");
+            } else {
+                ContactBean contactBean = GsonUtil.json2Bean(beanJson, ContactBean.class);
+                contactBean.setAccount(CipherUtil.decode(param));
                 ResultBean resultBean = DataUtil.doInsertContact(contactBean);
                 writer.print(GsonUtil.bean2Json(resultBean));
             }
@@ -424,8 +470,8 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=doScanJsp")
-    private void doScanJsp(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=scanJsp")
+    private void scanJsp(HttpServletRequest request, HttpServletResponse response) {
         try {
             request.setAttribute("message", "信息错误");
             request.getRequestDispatcher("/loyal/scan.jsp").forward(request, response);
@@ -434,12 +480,12 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmCheckApkVer")
-    public void mwmCheckApkVer(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=checkVersion")
+    public void checkVersion(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            ResultBean resultBean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()), getReqParams(request, "apkVer"));
+            ResultBean resultBean = DataUtil.queryApkVersion(String.valueOf(request.getLocalPort()), getRequestParams(request, "apkVer"));
             writer.print(GsonUtil.bean2Json(resultBean));
         } catch (Exception e) {
             e.printStackTrace();
@@ -462,12 +508,12 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=mwmGetSelfFeed")
-    public void mwmGetSelfFeed(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=getFeedback")
+    public void getFeedback(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         try {
             writer = response.getWriter();
-            String account = getReqParams(request, "account");
+            String account = getRequestParams(request, "account");
             ResultBean<List<FeedBackBean>> resultBean;
             if (initParams(writer, response, account)) {
                 return;
@@ -483,12 +529,12 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=deleteSelfFeed")
-    public void deleteSelfFeed(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=deleteFeedback")
+    public void deleteFeedback(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         response.setCharacterEncoding("utf-8");
         try {
-            String json = getReqParams(request, "beanJson");
+            String json = getRequestParams(request, "beanJson");
             writer = response.getWriter();
             ResultBean resultBean;
             if (emptyJson(json)) {
@@ -506,13 +552,13 @@ public class AndroidAction extends MultiActionController implements Contact {
         }
     }
 
-    @RequestMapping(params = "method=destroyAccount")
-    public void destroyAccount(HttpServletRequest request, HttpServletResponse response) {
+    @RequestMapping(params = "method=accountDestroy")
+    public void accountDestroy(HttpServletRequest request, HttpServletResponse response) {
         PrintWriter writer = null;
         response.setCharacterEncoding("utf-8");
         try {
             writer = response.getWriter();
-            String json = getReqParams(request, "beanJson");
+            String json = getRequestParams(request, "beanJson");
             ResultBean resultBean;
             if (emptyJson(json)) {
                 resultBean = new ResultBean("-1", "参数不能为空");
@@ -549,7 +595,7 @@ public class AndroidAction extends MultiActionController implements Contact {
         return false;
     }
 
-    private String getReqParams(HttpServletRequest request, String param) {
+    private String getRequestParams(HttpServletRequest request, String param) {
         try {
             return StringUtil.replaceNull(request.getParameter(param));
         } catch (Exception e) {

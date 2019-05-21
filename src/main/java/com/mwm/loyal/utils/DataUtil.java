@@ -252,9 +252,9 @@ public class DataUtil implements Contact {
             pre.setTimestamp(1, TimeUtil.date2Timestamp(contactBean.getTime()));
             pre.setString(2, contactBean.getAccount());
             String contact = contactBean.getContact();
-            if (contact.contains("&k="))
-                contact = contact.substring(contact.indexOf("&k=")).replace("&k=", "");
-            pre.setString(3, contact.contains("&k=") ? CipherUtil.decodeStr(contact) : contact);
+            if (contact.contains("&key="))
+                contact = contact.substring(contact.indexOf("&key=")).replace("&key=", "");
+            pre.setString(3, contact.contains("&key=") ? contact : contact);
             int result = pre.executeUpdate();
             bean.setCode(result);
             if (result == -1)

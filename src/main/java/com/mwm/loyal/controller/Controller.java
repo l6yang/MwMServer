@@ -14,5 +14,4 @@ public class Controller {
     public String scan() {
         return "scan";
     }
-
 }

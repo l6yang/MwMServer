@@ -25,6 +25,23 @@ public class Main {
         } finally {
             StreamUtil.close(reader);
         }*/
-        System.out.println(TimeUtil.getDate(new Date(), Contact.Str.TIME_ALL));
+        //System.out.println(TimeUtil.getDate(new Date(), Contact.Str.TIME_ALL));
+        String xml=
+               "<?xml version=\"1.0\" encoding=\"GBK\"?>\n" +
+                       "<root>\n" +
+                       "    <head>\n" +
+                       "        <code>2</code>\n" +
+                       "        <message></message>\n" +
+                       "    </head>\n" +
+                       "    <body>\n" +
+                       "        <vehisinfo>\n" +
+                       "            <jylsh>Q02718062100041</jylsh>\n" +
+                       "            <jycs>1</jycs>\n" +
+                       "            <zpyq></zpyq>\n" +
+                       "            <jyxmyq></jyxmyq>\n" +
+                       "        </vehisinfo>\n" +
+                       "    </body>\n" +
+                       "</root>";
+        System.out.println(xml);
     }
 }
